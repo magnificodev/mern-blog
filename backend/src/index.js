@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 import UserRoute from "./routes/UserRoute.js";
+import AuthRoute from "./routes/AuthRoute.js";
 
 // Constant variables
 const PORT = process.env.PORT_NUMBER || 3000;
@@ -19,9 +20,14 @@ mongoose
 const app = express();
 
 
-// App routes
-app.use("/api/user/", UserRoute);
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+
+// App routes
+app.use("/api/user", UserRoute);
+app.use("/api/auth", AuthRoute);
 
 // Listen the upcoming requests
 app.listen(PORT, () => {
