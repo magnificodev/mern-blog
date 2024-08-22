@@ -19,15 +19,24 @@ mongoose
 
 const app = express();
 
-
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 // App routes
 app.use("/api/user", UserRoute);
 app.use("/api/auth", AuthRoute);
+
+// Handling error route
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message,
+    });
+});
 
 // Listen the upcoming requests
 app.listen(PORT, () => {
