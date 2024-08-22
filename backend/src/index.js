@@ -2,12 +2,13 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+import UserRoute from "./routes/UserRoute.js";
+
 // Constant variables
 const PORT = process.env.PORT_NUMBER || 3000;
 
 // Load environment variables from .env file
 dotenv.config();
-
 
 // Connect the database
 mongoose
@@ -16,6 +17,10 @@ mongoose
     .catch((err) => console.log(err));
 
 const app = express();
+
+
+// App routes
+app.use("/api/user/", UserRoute);
 
 
 // Listen the upcoming requests
