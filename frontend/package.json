@@ -10,15 +10,18 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.52.1",
         "flowbite": "^2.5.1",
         "flowbite-react": "^0.10.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
+        "react-hook-form": "^7.53.0",
         "react-icon": "^1.0.0",
         "react-router-dom": "^6.26.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.9.0",
+        "@tanstack/react-query-devtools": "^5.52.1",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@vitejs/plugin-react-swc": "^3.5.0",
