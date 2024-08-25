@@ -10,7 +10,7 @@ export const signUp = async (userData) => {
     const responseBody = await response.json();
 
     if (!(responseBody.status === 'success')) {
-        throw new Error(responseBody.data.message);
+        throw new Error(responseBody.message);
     }
 
     return responseBody

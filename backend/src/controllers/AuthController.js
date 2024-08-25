@@ -9,9 +9,8 @@ export const SignUp = async (req, res) => {
         if (!username || !email || !password) {
             return res.status(400).json({
                 status: "failure",
-                data: {
-                    message: "All fields are required",
-                },
+                message: "All fields are required",
+                data: {},
             }); // 400 Bad Request
         }
         const existingUser = await User.findOne({
@@ -21,9 +20,8 @@ export const SignUp = async (req, res) => {
         if (existingUser) {
             return res.status(409).json({
                 status: "faluire",
-                data: {
-                    message: "Can not create the account for some reasons",
-                },
+                message: "Can not create the account for some reasons",
+                data: {},
             });
         } // 409 Conflict
 
@@ -39,16 +37,65 @@ export const SignUp = async (req, res) => {
 
         res.json({
             status: "success",
-            data: {
-                message: "Sign up successfully",
-            },
+            message: "Sign up successfully",
+            data: {},
         });
     } catch (err) {
         res.json({
             status: "failure",
-            data: {
-                message: err.message,
-            },
+            message: err.message,
+            data: {},
+        });
+    }
+};
+
+export const SignIn = async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+
+        if (!(username || email) || !password) {
+            return res.status(400).json({
+                status: "failure",
+                message: "All fields are required",
+                data: {},
+            });
+        }
+
+        const existingUser = await User.findOne({
+            $or: [{ username }, { email }],
+        });
+
+        if (!existingUser) {
+            return res.status(404).json({
+                status: "failure",
+                message: "Your account doesn't exist",
+                data: {},
+            });
+        }
+
+        const isPasswordMatched = await bcryptjs.compare(
+            password,
+            existingUser.password
+        );
+
+        if (!isPasswordMatched) {
+            return res.status(401).json({
+                status: "failure",
+                message: "Incorrect password. Please try again",
+                data: {},
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Sign in successfully",
+            data: {},
+        });
+    } catch (err) {
+        res.json({
+            status: "failure",
+            message: err.message,
+            data: {},
         });
     }
 };

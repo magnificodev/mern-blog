@@ -29,7 +29,7 @@ const SignUp = () => {
         mutationFn: signUp,
         onSuccess: (data) => {
             navigate("/");
-            console.log(data.data.message);
+            console.log(data.message);
         },
     });
 
