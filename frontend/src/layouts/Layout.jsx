@@ -1,3 +1,4 @@
+import Footer from "../components/MyFooter";
 import Header from "../components/Header";
 
 const Layout = ({ children }) => {
@@ -5,6 +6,7 @@ const Layout = ({ children }) => {
         <div>
             <Header />
             {children}
+            <Footer />
         </div>
     );
 };

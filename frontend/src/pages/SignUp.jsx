@@ -1,7 +1,7 @@
 import { Label, TextInput, Button, Alert, Spinner } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import {
     usernameValidationObj,
@@ -23,8 +23,14 @@ const SignUp = () => {
         },
     });
 
+    const navigate = useNavigate();
+
     const { mutate, error, isError, isPending } = useMutation({
         mutationFn: signUp,
+        onSuccess: (data) => {
+            navigate("/");
+            console.log(data.data.message);
+        },
     });
 
     const onSubmit = (userData) => {
@@ -118,7 +124,7 @@ const SignUp = () => {
                     </form>
                     <div className="text-sm flex gap-1 mt-5">
                         <span>Have an account?</span>
-                        <Link to="sign-in" className="text-blue-500">
+                        <Link to="/sign-in" className="text-blue-500">
                             Sign in
                         </Link>
                     </div>
