@@ -1,4 +1,5 @@
 import bcryptjs from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import User from "../models/User.js";
 
@@ -86,11 +87,25 @@ export const SignIn = async (req, res) => {
             });
         }
 
-        res.status(200).json({
-            status: "success",
-            message: "Sign in successfully",
-            data: {},
-        });
+        const token = jwt.sign(
+            { id: existingUser._id },
+            process.env.JWT_SECRET_KEY
+        );
+
+        const { password: pass, ...rest } = existingUser._doc;
+
+        res.status(200)
+            .cookie("access_token", token, {
+                httpOnly: true,
+                maxAge: 1 * 60 * 60 * 1000,
+            })
+            .json({
+                status: "success",
+                message: "Sign in successfully",
+                data: {
+                    user: rest
+                },
+            });
     } catch (err) {
         res.json({
             status: "failure",
