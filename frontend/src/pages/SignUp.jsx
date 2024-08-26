@@ -7,7 +7,7 @@ import {
     usernameValidationObj,
     emailValidationObj,
     passwordValidationObj,
-} from "../validation/SignUpValidation";
+} from "../validation/FormValidation";
 import { signUp } from "../api/auth";
 
 const SignUp = () => {
@@ -39,7 +39,7 @@ const SignUp = () => {
 
     return (
         <div className="min-h-screen mt-20">
-            <div className="flex flex-col p-3 max-w-3xl mx-auto items-center md:flex-row gap-5">
+            <div className="flex flex-col p-3 max-w-3xl mx-auto items-center md:flex-row gap-5 md:gap-8">
                 <div className="text-left w-full">
                     <Link to="/" className="font-bold dark:text-white text-4xl">
                         <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
@@ -54,14 +54,15 @@ const SignUp = () => {
                 </div>
                 <div className="w-full">
                     <form
-                        className="flex flex-col gap-4"
+                        className="flex flex-col gap-2"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div>
+                        <div className="flex flex-col gap-2">
                             <Label value="Your username" htmlFor="username" />
                             <TextInput
                                 type="text"
                                 id="username"
+                                placeholder="example"
                                 {...register("username", usernameValidationObj)}
                                 color={errors.username?.message && "failure"}
                                 helperText={
@@ -73,7 +74,7 @@ const SignUp = () => {
                                 }
                             />
                         </div>
-                        <div>
+                        <div className="flex flex-col gap-2">
                             <Label value="Your email" htmlFor="email" />
                             <TextInput
                                 type="email"
@@ -91,11 +92,12 @@ const SignUp = () => {
                                 }
                             />
                         </div>
-                        <div>
+                        <div className="flex flex-col gap-2">
                             <Label value="Your password" htmlFor="password" />
                             <TextInput
                                 type="password"
                                 id="password"
+                                placeholder="******"
                                 {...register("password", passwordValidationObj)}
                                 color={errors.password?.message && "failure"}
                                 helperText={

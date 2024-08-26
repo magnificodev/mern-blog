@@ -52,9 +52,9 @@ export const SignUp = async (req, res) => {
 
 export const SignIn = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { email, password } = req.body;
 
-        if (!(username || email) || !password) {
+        if (!email || !password) {
             return res.status(400).json({
                 status: "failure",
                 message: "All fields are required",
@@ -63,7 +63,7 @@ export const SignIn = async (req, res) => {
         }
 
         const existingUser = await User.findOne({
-            $or: [{ username }, { email }],
+            email,
         });
 
         if (!existingUser) {
@@ -103,7 +103,7 @@ export const SignIn = async (req, res) => {
                 status: "success",
                 message: "Sign in successfully",
                 data: {
-                    user: rest
+                    user: rest,
                 },
             });
     } catch (err) {
