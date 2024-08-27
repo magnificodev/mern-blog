@@ -8,6 +8,7 @@ import {
     passwordValidationObj,
 } from "../validation/FormValidation";
 import { signIn } from "../api/auth";
+import OAuth from "../components/OAuth";
 
 const SignIn = () => {
     const {
@@ -48,12 +49,11 @@ const SignIn = () => {
                         className="flex flex-col gap-2"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div className="flex flex-col gap-2">
+                        <div>
                             <Label value="Your email" htmlFor="email" />
                             <TextInput
                                 type="email"
                                 id="email"
-                                className="focus:placeholder-transparent"
                                 placeholder="example@gmail.com"
                                 {...register("email", emailValidationObj)}
                                 color={errors.email?.message && "failure"}
@@ -66,7 +66,7 @@ const SignIn = () => {
                                 }
                             />
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div>
                             <Label value="Your password" htmlFor="password" />
                             <TextInput
                                 type="password"
@@ -97,6 +97,7 @@ const SignIn = () => {
                                 "Sign In"
                             )}
                         </Button>
+                        <OAuth/>
                     </form>
                     <div className="text-sm flex gap-1 mt-5">
                         <span>Don't have an account?</span>

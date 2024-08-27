@@ -9,6 +9,7 @@ import {
     passwordValidationObj,
 } from "../validation/FormValidation";
 import { signUp } from "../api/auth";
+import OAuth from "../components/OAuth";
 
 const SignUp = () => {
     const {
@@ -57,7 +58,7 @@ const SignUp = () => {
                         className="flex flex-col gap-2"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div className="flex flex-col gap-2">
+                        <div>
                             <Label value="Your username" htmlFor="username" />
                             <TextInput
                                 type="text"
@@ -74,12 +75,11 @@ const SignUp = () => {
                                 }
                             />
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div>
                             <Label value="Your email" htmlFor="email" />
                             <TextInput
                                 type="email"
                                 id="email"
-                                className="focus:placeholder-transparent"
                                 placeholder="example@gmail.com"
                                 {...register("email", emailValidationObj)}
                                 color={errors.email?.message && "failure"}
@@ -92,7 +92,7 @@ const SignUp = () => {
                                 }
                             />
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div>
                             <Label value="Your password" htmlFor="password" />
                             <TextInput
                                 type="password"
@@ -123,6 +123,7 @@ const SignUp = () => {
                                 "Sign Up"
                             )}
                         </Button>
+                        <OAuth />
                     </form>
                     <div className="text-sm flex gap-1 mt-5">
                         <span>Have an account?</span>

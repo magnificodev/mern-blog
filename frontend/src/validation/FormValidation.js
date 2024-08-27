@@ -4,10 +4,6 @@ export const usernameValidationObj = {
         value: 4,
         message: "Username must be at least 4 characters",
     },
-    maxLength: {
-        value: 16,
-        message: "Username must be equal to or less than 16 characters",
-    },
     pattern: {
         value: /^[A-Za-z0-9_]+$/,
         message: "Username can only include letters, numbers, and underscores",
