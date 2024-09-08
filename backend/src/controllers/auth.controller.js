@@ -92,16 +92,18 @@ export const SignIn = async (req, res, next) => {
                 },
             });
     } catch (err) {
-        next(err)
+        next(err);
     }
 };
 
-export const GoogleAuth = async (req, res) => {
+export const GoogleAuth = async (req, res, next) => {
     try {
         const { name, email, googlePhotoUrl } = req.body;
+
         const existingUser = await User.findOne({
             email,
         });
+
         if (existingUser) {
             const token = jwt.sign(
                 { id: existingUser._id },
@@ -157,6 +159,6 @@ export const GoogleAuth = async (req, res) => {
                 });
         }
     } catch (err) {
-        next(err)
+        next(err);
     }
 };

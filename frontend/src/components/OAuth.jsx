@@ -4,10 +4,22 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
 import { useMutation } from "@tanstack/react-query";
 import { googleAuth } from "../api/auth";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { signInSuccess } from "../redux/user/userSlice";
 
 const OAuth = () => {
+
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const { mutate } = useMutation({
         mutationFn: googleAuth,
+        onSuccess: (data) => {
+            navigate("/");
+            dispatch(signInSuccess(data.data.user))
+        },
     });
 
     const handleGoogleClick = async () => {

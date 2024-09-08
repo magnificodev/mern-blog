@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Label, TextInput, Button, Spinner, Alert } from "flowbite-react";
 import { useMutation } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
 
 import {
     emailValidationObj,
@@ -9,6 +10,7 @@ import {
 } from "../validation/FormValidation";
 import { signIn } from "../api/auth";
 import OAuth from "../components/OAuth";
+import { signInSuccess } from "../redux/user/userSlice";
 
 const SignIn = () => {
     const {
@@ -16,14 +18,15 @@ const SignIn = () => {
         handleSubmit,
         formState: { errors },
     } = useForm();
-
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const { mutate, error, isError, isPending } = useMutation({
         mutationFn: signIn,
-        onSuccess: () => {
-            navigate("/")
-        }
+        onSuccess: (data) => {
+            dispatch(signInSuccess(data.data.user));
+            navigate("/");
+        },
     });
 
     const onSubmit = (userData) => {
@@ -97,7 +100,7 @@ const SignIn = () => {
                                 "Sign In"
                             )}
                         </Button>
-                        <OAuth/>
+                        <OAuth />
                     </form>
                     <div className="text-sm flex gap-1 mt-5">
                         <span>Don't have an account?</span>
