@@ -120,6 +120,7 @@ const DashProfile = () => {
                     id="email"
                     placeholder="Email"
                     defaultValue={currentUser.email}
+                    disabled
                 />
                 <TextInput
                     type="text"

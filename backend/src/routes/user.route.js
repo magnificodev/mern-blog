@@ -1,9 +1,11 @@
 import express from "express";
 
-import { testApi } from "../controllers/user.controller.js";
+import { updateUser } from "../controllers/user.controller.js";
+import verifyToken from "../middlewares/auth.middleware.js";
+import { updateValidator } from "../validators/user.validator.js";
 
 const router = express.Router();
 
-router.get("/test", testApi);
+router.put("/:userId", verifyToken, updateValidator, updateUser);
 
 export default router;

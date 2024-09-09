@@ -20,7 +20,7 @@ export const SignUp = async (req, res, next) => {
         });
 
         if (existingUser) {
-            return next(new MyError(409, "Your account has been existed"));
+            return next(new MyError(409, "The account has been existed"));
         } // 409 Conflict
 
         const hashedPassword = await bcryptjs.hash(password, 10);
@@ -73,7 +73,7 @@ export const SignIn = async (req, res, next) => {
         } // 401 Unauthorized
 
         const token = jwt.sign(
-            { id: existingUser._id },
+            { userId: existingUser._id },
             process.env.JWT_SECRET_KEY
         );
 
@@ -106,7 +106,7 @@ export const GoogleAuth = async (req, res, next) => {
 
         if (existingUser) {
             const token = jwt.sign(
-                { id: existingUser._id },
+                { userId: existingUser._id },
                 process.env.JWT_SECRET_KEY
             );
 
@@ -140,7 +140,7 @@ export const GoogleAuth = async (req, res, next) => {
 
             await newUser.save();
             const token = jwt.sign(
-                { id: newUser._id },
+                { userId: newUser._id },
                 process.env.JWT_SECRET_KEY
             );
 
