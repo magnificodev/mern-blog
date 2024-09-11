@@ -16,7 +16,7 @@ export const signUp = async (userData) => {
 
         return responseBody;
     } catch (err) {
-        return err.message;
+        throw new Error(err.message);
     }
 };
 
@@ -38,7 +38,7 @@ export const signIn = async (userData) => {
 
         return responseBody;
     } catch (err) {
-        return err.message;
+        throw new Error(err.message);
     }
 };
 
@@ -56,6 +56,6 @@ export const googleAuth = async (userData) => {
         console.log(responseBody);
         return responseBody;
     } catch (err) {
-        return err.message;
+        throw new Error(err.message);
     }
 };

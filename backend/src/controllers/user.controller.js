@@ -18,7 +18,9 @@ export const updateUser = async (req, res, next) => {
 
         const { username, email, password, profilePic } = req.body;
 
-        const isExist = await User.findOne({ username });
+        const isExist = await User.findOne({
+            $and: [{ username }, { _id: { $ne: req.userId } }],
+        });
         if (isExist)
             return next(
                 new MyError(409, "Username has been used, please try another")

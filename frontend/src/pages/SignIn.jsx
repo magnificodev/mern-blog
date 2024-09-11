@@ -4,10 +4,7 @@ import { Label, TextInput, Button, Spinner, Alert } from "flowbite-react";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 
-import {
-    emailValidationObj,
-    passwordValidationObj,
-} from "../validation/FormValidation";
+import { emailValidationObj, passwordValidationObj } from "../validation/FormValidation";
 import { signIn } from "../api/auth";
 import OAuth from "../components/OAuth";
 import { signInSuccess } from "../redux/user/userSlice";
@@ -35,7 +32,7 @@ const SignIn = () => {
     return (
         <div className="min-h-screen mt-20">
             <div className="flex flex-col p-3 max-w-3xl mx-auto items-center md:flex-row gap-5 md:gap-8">
-                <div className="text-left w-full">
+                <div className="w-full">
                     <Link to="/" className="font-bold dark:text-white text-4xl">
                         <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
                             {"Magnificodev's"}
@@ -43,15 +40,12 @@ const SignIn = () => {
                         Blog
                     </Link>
                     <p className="text-sm mt-5">
-                        This is a demo project. You can sign in with your email
-                        and password or with Google.
+                        This is a demo project. You can sign in with your email and password or with
+                        Google.
                     </p>
                 </div>
                 <div className="w-full">
-                    <form
-                        className="flex flex-col gap-2"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
+                    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
                         <div>
                             <Label value="Your email" htmlFor="email" />
                             <TextInput
@@ -59,13 +53,15 @@ const SignIn = () => {
                                 id="email"
                                 placeholder="example@gmail.com"
                                 {...register("email", emailValidationObj)}
-                                color={errors.email?.message && "failure"}
+                                color={errors.email && "failure"}
                                 helperText={
-                                    <>
-                                        <span className="font-normal">
-                                            {errors.email?.message}
-                                        </span>
-                                    </>
+                                    errors.email && (
+                                        <>
+                                            <span className="font-normal">
+                                                {errors.email?.message}
+                                            </span>
+                                        </>
+                                    )
                                 }
                             />
                         </div>
@@ -76,21 +72,19 @@ const SignIn = () => {
                                 id="password"
                                 placeholder="******"
                                 {...register("password", passwordValidationObj)}
-                                color={errors.password?.message && "failure"}
+                                color={errors.password && "failure"}
                                 helperText={
-                                    <>
-                                        <span className="font-normal">
-                                            {errors.password?.message}
-                                        </span>
-                                    </>
+                                    errors.password && (
+                                        <>
+                                            <span className="font-normal">
+                                                {errors.password?.message}
+                                            </span>
+                                        </>
+                                    )
                                 }
                             />
                         </div>
-                        <Button
-                            gradientDuoTone="purpleToPink"
-                            type="submit"
-                            disabled={isPending}
-                        >
+                        <Button gradientDuoTone="purpleToPink" type="submit" disabled={isPending}>
                             {isPending ? (
                                 <>
                                     <Spinner size="sm" />
