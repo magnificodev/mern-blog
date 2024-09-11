@@ -1,4 +1,5 @@
-import { Button, TextInput, Alert, Spinner } from "flowbite-react";
+import { Button, TextInput, Alert, Spinner, Modal } from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
@@ -10,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 
 import { updateSuccess } from "../redux/user/userSlice";
-import { updateUser } from "../api/user";
+import { deleteUser, updateUser } from "../api/user";
 
 const DashProfile = () => {
     const { currentUser } = useSelector((state) => state.user);
@@ -20,6 +21,7 @@ const DashProfile = () => {
     const [imageFileUploadError, setImageFileUploadError] = useState(null);
     const [imageFileUploading, setImageFileUploading] = useState(false);
     const [isImageUpdated, setIsImageUpdated] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
     const filePickerRef = useRef();
 
     const {
@@ -38,7 +40,7 @@ const DashProfile = () => {
 
     const dispatch = useDispatch();
 
-    const { mutate, error, data, isPending, isError } = useMutation({
+    const mutationUpdateUser = useMutation({
         mutationFn: updateUser,
         onSuccess: (data) => {
             dispatch(updateSuccess(data.data.user));
@@ -56,10 +58,15 @@ const DashProfile = () => {
         },
     });
 
+    const mutationDeleteUser = useMutation({
+        mutationFn: deleteUser,
+        onSuccess: () => {},
+    });
+
     // Handle submiting form
     const onSubmit = (userData) => {
         userData.profilePic = imageFileUrl ? imageFileUrl : currentUser.profilePic;
-        mutate(userData);
+        mutationUpdateUser.mutate(userData);
     };
 
     const handleImageChange = (e) => {
@@ -68,6 +75,10 @@ const DashProfile = () => {
 
         setImageFile(e.target.files[0]);
         setImageFileUrl(URL.createObjectURL(file));
+    };
+
+    const deleteAccount = () => {
+        // mutationDeleteUser.mutate(currentUser._id);
     };
 
     // Upload image on firebase
@@ -178,7 +189,7 @@ const DashProfile = () => {
                     outline
                     disabled={(!isDirty || imageFileUploading) && !isImageUpdated}
                 >
-                    {isPending ? (
+                    {mutationUpdateUser.isPending ? (
                         <>
                             <Spinner size="sm" />
                             <span className="ml-2">Updating...</span>
@@ -189,18 +200,39 @@ const DashProfile = () => {
                 </Button>
             </form>
             <div className="flex justify-between text-red-500 mt-5">
-                <span className="cursor-pointer">Delete Account</span>
+                <span className="cursor-pointer" onClick={() => setOpenModal(true)}>
+                    Delete Account
+                </span>
                 <span className="cursor-pointer">Sign out</span>
             </div>
-            {isError ? (
+            {mutationUpdateUser.isError ? (
                 <Alert className="mt-5" color="failure">
-                    {error.message}
+                    {mutationUpdateUser.error.message}
                 </Alert>
-            ) : data?.message ? (
+            ) : mutationUpdateUser.data?.message ? (
                 <Alert className="mt-5" color="success">
-                    {data?.message}
+                    {mutationUpdateUser.data?.message}
                 </Alert>
             ) : null}
+            <Modal show={openModal} size="md" onClose={() => setOpenModal(false)} popup>
+                <Modal.Header />
+                <Modal.Body>
+                    <div className="text-center">
+                        <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+                        <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                            Are you sure you want to delete this user?
+                        </h3>
+                        <div className="flex justify-center gap-4">
+                            <Button color="failure" onClick={() => setOpenModal(false)}>
+                                {"Yes, I'm sure"}
+                            </Button>
+                            <Button color="gray" onClick={() => setOpenModal(false)}>
+                                No, cancel
+                            </Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };

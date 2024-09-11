@@ -7,5 +7,6 @@ import { updateValidator } from "../validators/user.validator.js";
 const router = express.Router();
 
 router.put("/:userId", verifyToken, updateValidator, updateUser);
+router.delete("/:userId", verifyToken, deleteUser);
 
 export default router;

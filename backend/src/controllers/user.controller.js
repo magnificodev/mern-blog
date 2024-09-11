@@ -6,9 +6,7 @@ import { validationResult } from "express-validator";
 export const updateUser = async (req, res, next) => {
     try {
         if (req.userId !== req.params.userId)
-            return next(
-                new MyError(403, "You are not allowed to update this user")
-            );
+            return next(new MyError(403, "You are not allowed to update this user"));
 
         const errors = validationResult(req);
 
@@ -21,10 +19,7 @@ export const updateUser = async (req, res, next) => {
         const isExist = await User.findOne({
             $and: [{ username }, { _id: { $ne: req.userId } }],
         });
-        if (isExist)
-            return next(
-                new MyError(409, "Username has been used, please try another")
-            );
+        if (isExist) return next(new MyError(409, "Username has been used, please try another"));
 
         const hashedPassword = await brcyptjs.hash(password, 10);
 
@@ -45,11 +40,27 @@ export const updateUser = async (req, res, next) => {
 
         res.status(200).json({
             status: "success",
-            message: "User was updated successfully!",
+            message: "User has been updated!",
             data: {
                 user: rest,
             },
         });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteUser = async (req, res, next) => {
+    try {
+        if (req.userId !== req.params.userId)
+            return next(new MyError(403, "You are not allowed to delete this user"));
+
+        await User.findByIdAndDelete(req.params.userId)
+        res.status(200).json({
+            status: "success",
+            message: "User has been deleted!",
+            data: {}
+        })
     } catch (err) {
         next(err);
     }
