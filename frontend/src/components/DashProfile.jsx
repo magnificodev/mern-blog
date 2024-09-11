@@ -9,8 +9,9 @@ import "react-circular-progressbar/dist/styles.css";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
-import { updateSuccess } from "../redux/user/userSlice";
+import { updateSuccess, deleteSuccess } from "../redux/user/userSlice";
 import { deleteUser, updateUser } from "../api/user";
 
 const DashProfile = () => {
@@ -39,6 +40,7 @@ const DashProfile = () => {
     });
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const mutationUpdateUser = useMutation({
         mutationFn: updateUser,
@@ -60,7 +62,10 @@ const DashProfile = () => {
 
     const mutationDeleteUser = useMutation({
         mutationFn: deleteUser,
-        onSuccess: () => {},
+        onSuccess: () => {
+            dispatch(deleteSuccess())
+            navigate("/");
+        },
     });
 
     // Handle submiting form
@@ -78,7 +83,8 @@ const DashProfile = () => {
     };
 
     const deleteAccount = () => {
-        // mutationDeleteUser.mutate(currentUser._id);
+        mutationDeleteUser.mutate(currentUser._id);
+        setOpenModal(false);
     };
 
     // Upload image on firebase
@@ -220,11 +226,18 @@ const DashProfile = () => {
                     <div className="text-center">
                         <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
                         <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                            Are you sure you want to delete this user?
+                            Are you sure you want to delete your account?
                         </h3>
                         <div className="flex justify-center gap-4">
-                            <Button color="failure" onClick={() => setOpenModal(false)}>
-                                {"Yes, I'm sure"}
+                            <Button color="failure" onClick={deleteAccount}>
+                                {mutationDeleteUser.isPending ? (
+                                    <>
+                                        <Spinner size="sm" />
+                                        <span className="ml-2">Updating...</span>
+                                    </>
+                                ) : (
+                                    "Yes, I'm sure"
+                                )}
                             </Button>
                             <Button color="gray" onClick={() => setOpenModal(false)}>
                                 No, cancel

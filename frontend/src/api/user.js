@@ -32,6 +32,7 @@ export const deleteUser = async (userId) => {
         if (responseBody.status === "failure") {
             throw new Error(responseBody.message);
         }
+        console.log(responseBody)
 
         return responseBody;
     } catch (err) {

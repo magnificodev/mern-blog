@@ -23,7 +23,7 @@ const SignUp = () => {
     const { mutate, error, isError, isPending } = useMutation({
         mutationFn: signUp,
         onSuccess: (data) => {
-            navigate("/");
+            navigate("/sign-in");
         },
     });
 
