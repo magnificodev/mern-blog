@@ -61,21 +61,13 @@ export const SignIn = async (req, res, next) => {
             return next(new MyError(404, "Your account doesn't exist"));
         } // 404 Bad Request
 
-        const isPasswordMatched = await bcryptjs.compare(
-            password,
-            existingUser.password
-        );
+        const isPasswordMatched = await bcryptjs.compare(password, existingUser.password);
 
         if (!isPasswordMatched) {
-            return next(
-                new MyError(401, "Incorrect password. Please try again")
-            );
+            return next(new MyError(401, "Incorrect password. Please try again"));
         } // 401 Unauthorized
 
-        const token = jwt.sign(
-            { userId: existingUser._id },
-            process.env.JWT_SECRET_KEY
-        );
+        const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY);
 
         const { password: pass, ...rest } = existingUser._doc;
 
@@ -105,10 +97,7 @@ export const GoogleAuth = async (req, res, next) => {
         });
 
         if (existingUser) {
-            const token = jwt.sign(
-                { userId: existingUser._id },
-                process.env.JWT_SECRET_KEY
-            );
+            const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY);
 
             const { password: pass, ...rest } = existingUser._doc;
             res.status(200)
@@ -125,24 +114,19 @@ export const GoogleAuth = async (req, res, next) => {
                 });
         } else {
             const generatedPassword =
-                Math.random().toString(36).slice(-8) +
-                Math.random().toString(36).slice(-8);
+                Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
 
             const hashedPassword = await bcryptjs.hash(generatedPassword, 10);
             const newUser = new User({
                 username:
-                    name.toLowerCase().split(" ").join("") +
-                    Math.random().toString(9).slice(-4),
+                    name.toLowerCase().split(" ").join("") + Math.random().toString(9).slice(-4),
                 email,
                 password: hashedPassword,
                 profilePic: googlePhotoUrl,
             });
 
             await newUser.save();
-            const token = jwt.sign(
-                { userId: newUser._id },
-                process.env.JWT_SECRET_KEY
-            );
+            const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY);
 
             const { password: pass, ...rest } = newUser._doc;
             res.status(200)
@@ -158,6 +142,18 @@ export const GoogleAuth = async (req, res, next) => {
                     },
                 });
         }
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const SignOut = async (req, res, next) => {
+    try {
+        res.clearCookie("accessToken").status(200).json({
+            status: "success",
+            message: "User has been signed out",
+            data: {},
+        });
     } catch (err) {
         next(err);
     }

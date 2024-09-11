@@ -11,8 +11,9 @@ import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { updateSuccess, deleteSuccess } from "../redux/user/userSlice";
+import { updateSuccess, deleteSuccess, signOutSuccess } from "../redux/user/userSlice";
 import { deleteUser, updateUser } from "../api/user";
+import { signOut } from "../api/auth";
 
 const DashProfile = () => {
     const { currentUser } = useSelector((state) => state.user);
@@ -63,10 +64,18 @@ const DashProfile = () => {
     const mutationDeleteUser = useMutation({
         mutationFn: deleteUser,
         onSuccess: () => {
-            dispatch(deleteSuccess())
+            dispatch(deleteSuccess());
             navigate("/");
         },
     });
+
+    const mutationSignOut = useMutation({
+        mutationFn: signOut,
+        onSuccess: () => {
+            dispatch(signOutSuccess());
+            navigate("/")
+        }
+    })
 
     // Handle submiting form
     const onSubmit = (userData) => {
@@ -81,6 +90,10 @@ const DashProfile = () => {
         setImageFile(e.target.files[0]);
         setImageFileUrl(URL.createObjectURL(file));
     };
+    
+    const handleSignOut = () => {
+        mutationSignOut.mutate()
+    }
 
     const deleteAccount = () => {
         mutationDeleteUser.mutate(currentUser._id);
@@ -209,7 +222,9 @@ const DashProfile = () => {
                 <span className="cursor-pointer" onClick={() => setOpenModal(true)}>
                     Delete Account
                 </span>
-                <span className="cursor-pointer">Sign out</span>
+                <span className="cursor-pointer" onClick={handleSignOut}>
+                    Sign out
+                </span>
             </div>
             {mutationUpdateUser.isError ? (
                 <Alert className="mt-5" color="failure">

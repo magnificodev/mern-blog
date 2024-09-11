@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import brcyptjs from "bcryptjs";
 import { validationResult } from "express-validator";
 
-export const updateUser = async (req, res, next) => {
+export const UpdateUser = async (req, res, next) => {
     try {
         if (req.userId !== req.params.userId)
             return next(new MyError(403, "You are not allowed to update this user"));
@@ -50,7 +50,7 @@ export const updateUser = async (req, res, next) => {
     }
 };
 
-export const deleteUser = async (req, res, next) => {
+export const DeleteUser = async (req, res, next) => {
     try {
         if (req.userId !== req.params.userId)
             return next(new MyError(403, "You are not allowed to delete this user"));

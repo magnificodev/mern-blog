@@ -1,10 +1,13 @@
 import { Navbar, TextInput, Button, Dropdown, Avatar } from "flowbite-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
 import { toggleTheme } from "../redux/theme/themeSlice";
+import { signOut } from "../api/auth";
+import { signOutSuccess } from "../redux/user/userSlice";
 
 const Header = () => {
     const path = useLocation().pathname;
@@ -15,6 +18,21 @@ const Header = () => {
     const { theme } = useSelector((state) => state.theme);
 
     const dispatch = useDispatch();
+
+    const navigate = useNavigate();
+
+    const mutationSignOut = useMutation({
+        mutationFn: signOut,
+        onSuccess: () => {
+            dispatch(signOutSuccess());
+            navigate("/");
+        },
+    });
+
+    const handleSignOut = () => {
+        console.log("Sign out");
+        mutationSignOut.mutate();
+    };
 
     return (
         <Navbar className="border-b-2 sticky top-0 z-10">
@@ -36,11 +54,7 @@ const Header = () => {
                 />
             </form>
 
-            <Button
-                className="w-12 h-10 items-center lg:hidden"
-                color="gray"
-                pill
-            >
+            <Button className="w-12 h-10 items-center lg:hidden" color="gray" pill>
                 <AiOutlineSearch />
             </Button>
 
@@ -58,18 +72,10 @@ const Header = () => {
                     <Dropdown
                         arrowIcon={false}
                         inline
-                        label={
-                            <Avatar
-                                alt="user"
-                                img={currentUser.profilePic}
-                                rounded
-                            />
-                        }
+                        label={<Avatar alt="user" img={currentUser.profilePic} rounded />}
                     >
                         <Dropdown.Header>
-                            <span className="block text-sm">
-                                @{currentUser.username}
-                            </span>
+                            <span className="block text-sm">@{currentUser.username}</span>
                             <span className="block text-sm font-medium truncate">
                                 {currentUser.email}
                             </span>
@@ -78,7 +84,7 @@ const Header = () => {
                             <Dropdown.Item>Profile</Dropdown.Item>
                         </Link>
                         <Dropdown.Divider />
-                        <Dropdown.Item>Sign Out</Dropdown.Item>
+                        <Dropdown.Item onClick={handleSignOut}>Sign Out</Dropdown.Item>
                     </Dropdown>
                 ) : (
                     <Link to="/sign-in">
