@@ -67,7 +67,10 @@ export const SignIn = async (req, res, next) => {
             return next(new MyError(401, "Incorrect password. Please try again"));
         } // 401 Unauthorized
 
-        const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY);
+        const token = jwt.sign(
+            { userId: existingUser._id, isAdmin: existingUser.isAdmin },
+            process.env.JWT_SECRET_KEY
+        );
 
         const { password: pass, ...rest } = existingUser._doc;
 
@@ -97,7 +100,10 @@ export const GoogleAuth = async (req, res, next) => {
         });
 
         if (existingUser) {
-            const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY);
+            const token = jwt.sign(
+                { userId: existingUser._id, isAdmin: existingUser.isAdmin },
+                process.env.JWT_SECRET_KEY
+            );
 
             const { password: pass, ...rest } = existingUser._doc;
             res.status(200)
@@ -126,7 +132,10 @@ export const GoogleAuth = async (req, res, next) => {
             });
 
             await newUser.save();
-            const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY);
+            const token = jwt.sign(
+                { userId: newUser._id, isAdmin: newUser.isAdmin },
+                process.env.JWT_SECRET_KEY
+            );
 
             const { password: pass, ...rest } = newUser._doc;
             res.status(200)

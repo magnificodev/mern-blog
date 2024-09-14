@@ -34,6 +34,15 @@ app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const status = err.status;
     const message = err.message || "Internal Server Error";
+    
+    if (err.name === "MongoServerError" && err.code === 11000) {
+        const fieldName = Object.keys(err.keyValue)[0];
+        message = `${fieldName.slice(0, 1).toUpperCase() + fieldName.slice(1)} already exists`;
+    }
+    if (err.name === "ValidationError") {
+        message = Object.values(err.errors)[0].message;
+    }
+
     res.status(statusCode).json({
         status,
         message,

@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { updateSuccess, deleteSuccess, signOutSuccess } from "../redux/user/userSlice";
 import { deleteUser, updateUser } from "../api/user";
@@ -73,9 +74,9 @@ const DashProfile = () => {
         mutationFn: signOut,
         onSuccess: () => {
             dispatch(signOutSuccess());
-            navigate("/")
-        }
-    })
+            navigate("/");
+        },
+    });
 
     // Handle submiting form
     const onSubmit = (userData) => {
@@ -90,10 +91,10 @@ const DashProfile = () => {
         setImageFile(e.target.files[0]);
         setImageFileUrl(URL.createObjectURL(file));
     };
-    
+
     const handleSignOut = () => {
-        mutationSignOut.mutate()
-    }
+        mutationSignOut.mutate();
+    };
 
     const deleteAccount = () => {
         mutationDeleteUser.mutate(currentUser._id);
@@ -217,6 +218,16 @@ const DashProfile = () => {
                         "Update"
                     )}
                 </Button>
+                {currentUser.isAdmin && (
+                    <Button
+                        type="button"
+                        gradientDuoTone="purpleToPink"
+                        as={Link}
+                        to="/create-post"
+                    >
+                        Create a post
+                    </Button>
+                )}
             </form>
             <div className="flex justify-between text-red-500 mt-5">
                 <span className="cursor-pointer" onClick={() => setOpenModal(true)}>
