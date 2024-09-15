@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     TextInput,
     Select,
@@ -11,6 +11,10 @@ import {
 import TextEditor from "../components/text-editor/TextEditor";
 import { storage } from "../firebase/firebaseConfig";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { createPost } from "../api/posts";
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
     const [imageFile, setImageFile] = useState(null);
@@ -18,6 +22,27 @@ const CreatePost = () => {
     const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
     const [canUpload, setCanUpload] = useState(false);
+
+    const {
+        register,
+        setValue,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
+    
+    const navigate = useNavigate();
+
+    const createPostMutation = useMutation({
+        mutationFn: createPost,
+        onSuccess: (data) => {
+            navigate(`/post/${data.data.post.slug}`)
+        },
+    });
+
+    const onSubmit = (postData) => {
+        if (imageFileUrl) postData.image = imageFileUrl;
+        createPostMutation.mutate(postData);
+    };
 
     const handleUploadImage = () => {
         try {
@@ -60,7 +85,10 @@ const CreatePost = () => {
             <h1 className="text-center text-3xl my-7 font-semibold">
                 Create Post
             </h1>
-            <form className="flex flex-col gap-4">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-4"
+            >
                 <div className="flex flex-col gap-4 sm:flex-row justify-between">
                     <TextInput
                         id="title"
@@ -68,8 +96,11 @@ const CreatePost = () => {
                         placeholder="Title"
                         className="flex-1"
                         required
+                        {...register("title", {
+                            required: "This field is required",
+                        })}
                     />
-                    <Select id="categories">
+                    <Select id="categories" {...register("category")}>
                         <option value="uncategorized">Select a category</option>
                         <option value="javascript">Javascript</option>
                         <option value="reactjs">ReactJS</option>
@@ -128,11 +159,25 @@ const CreatePost = () => {
                         className="w-full h-72 object-cover"
                     />
                 )}
-                <TextEditor />
+                <TextEditor
+                    register={register}
+                    setValue={setValue}
+                    errors={errors}
+                />
                 <Button type="submit" gradientDuoTone="purpleToPink">
                     Publish
                 </Button>
             </form>
+            {createPostMutation.isError && (
+                <Alert className="mt-5" color="failure">
+                    {createPostMutation.error.message}
+                </Alert>
+            )}
+            {createPostMutation.data && (
+                <Alert className="mt-5" color="success">
+                    {createPostMutation.data.message}
+                </Alert>
+            )}
         </div>
     );
 };

@@ -17,8 +17,8 @@ const postSchema = mongoose.Schema(
         },
         image: {
             type: String,
-            required: true,
-            default: "",
+            default:
+                "https://capherangxay.vn/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
         },
         category: {
             type: String,

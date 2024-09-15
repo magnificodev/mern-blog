@@ -9,6 +9,7 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import Toolbar from "./Toolbar";
 import "./TextEditor.scss";
+import { useEffect } from "react";
 
 const extensions = [
     StarterKit.configure({
@@ -34,16 +35,23 @@ const extensions = [
 
 const content = "";
 
-const TextEditor = () => {
+const TextEditor = ({ register, setValue, errors }) => {
     const editor = useEditor({
         extensions,
         content,
+        onUpdate: ({ editor }) => {
+            setValue("content", editor.getHTML());
+        },
     });
+
+    useEffect(() => {
+        register("content");
+    }, [content]);
 
     return (
         <div className="border-2 border-teal-500 bg-white dark:bg-transparent text-[#0d0d0d] dark:text-teal-50 flex flex-col rounded-md">
             <Toolbar editor={editor} />
-            <EditorContent editor={editor}></EditorContent>
+            <EditorContent editor={editor} required></EditorContent>
         </div>
     );
 };

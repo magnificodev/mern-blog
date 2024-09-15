@@ -266,7 +266,7 @@ const DashProfile = () => {
                 <Alert className="mt-5" color="failure">
                     {mutationUpdateUser.error.message}
                 </Alert>
-            ) : mutationUpdateUser.data?.message ? (
+            ) : mutationUpdateUser.data ? (
                 <Alert className="mt-5" color="success">
                     {mutationUpdateUser.data?.message}
                 </Alert>
