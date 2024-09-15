@@ -8,6 +8,7 @@ const verifyToken = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         req.userId = decoded.userId;
+        req.isAdmin = decoded.isAdmin;
 
         next();
     } catch (err) {

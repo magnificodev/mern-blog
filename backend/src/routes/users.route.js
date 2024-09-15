@@ -1,6 +1,6 @@
 import express from "express";
 
-import { UpdateUser, DeleteUser } from "../controllers/user.controller.js";
+import { UpdateUser, DeleteUser } from "../controllers/users.controller.js";
 import verifyToken from "../middlewares/auth.middleware.js";
 import { updateValidator } from "../validators/user.validator.js";
 

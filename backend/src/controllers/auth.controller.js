@@ -15,14 +15,6 @@ export const SignUp = async (req, res, next) => {
 
         const { username, email, password } = req.body;
 
-        const existingUser = await User.findOne({
-            $or: [{ username }, { email }],
-        });
-
-        if (existingUser) {
-            return next(new MyError(409, "The account has been existed"));
-        } // 409 Conflict
-
         const hashedPassword = await bcryptjs.hash(password, 10);
 
         const newUser = new User({
@@ -61,10 +53,15 @@ export const SignIn = async (req, res, next) => {
             return next(new MyError(404, "Your account doesn't exist"));
         } // 404 Bad Request
 
-        const isPasswordMatched = await bcryptjs.compare(password, existingUser.password);
+        const isPasswordMatched = await bcryptjs.compare(
+            password,
+            existingUser.password
+        );
 
         if (!isPasswordMatched) {
-            return next(new MyError(401, "Incorrect password. Please try again"));
+            return next(
+                new MyError(401, "Incorrect password. Please try again")
+            );
         } // 401 Unauthorized
 
         const token = jwt.sign(
@@ -120,12 +117,14 @@ export const GoogleAuth = async (req, res, next) => {
                 });
         } else {
             const generatedPassword =
-                Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+                Math.random().toString(36).slice(-8) +
+                Math.random().toString(36).slice(-8);
 
             const hashedPassword = await bcryptjs.hash(generatedPassword, 10);
             const newUser = new User({
                 username:
-                    name.toLowerCase().split(" ").join("") + Math.random().toString(9).slice(-4),
+                    name.toLowerCase().split(" ").join("") +
+                    Math.random().toString(9).slice(-4),
                 email,
                 password: hashedPassword,
                 profilePic: googlePhotoUrl,

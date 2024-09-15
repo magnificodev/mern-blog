@@ -98,7 +98,7 @@
 
     code {
         background-color: #1e293b;
-        border: 1px solid rgb(61,69,83);
+        border: 1px solid rgb(61, 69, 83);
         color: #f8f8f2;
         padding: 0.2em 0.4em;
         border-radius: 4px;
@@ -109,7 +109,7 @@
     pre {
         margin: 0.5rem 0;
         background-color: #1e293b;
-        border: 1px solid rgb(61,69,83);
+        border: 1px solid rgb(61, 69, 83);
         color: #61dafb;
         padding: 1em;
         border-radius: 4px;
@@ -157,6 +157,14 @@
         border-top: 2px solid rgba(#0d0d0d, 0.1);
         background-color: rgba(255, 255, 255, 0.5);
         margin: 1.5rem 0;
+    }
+
+    p.is-editor-empty:first-child::before {
+        color: #adb5bd;
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        pointer-events: none;
     }
 
     ul[data-type="taskList"] {

@@ -1,7 +1,7 @@
 export const updateUser = async (userData) => {
     try {
         console.log(userData);
-        const response = await fetch(`/api/user/${userData.userId}`, {
+        const response = await fetch(`/api/users/${userData.userId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -23,7 +23,7 @@ export const updateUser = async (userData) => {
 
 export const deleteUser = async (userId) => {
     try {
-        const response = await fetch(`/api/user/${userId}`, {
+        const response = await fetch(`/api/users/${userId}`, {
             method: "DELETE",
         });
 

@@ -16,11 +16,6 @@ export const UpdateUser = async (req, res, next) => {
 
         const { username, email, password, profilePic } = req.body;
 
-        const isExist = await User.findOne({
-            $and: [{ username }, { _id: { $ne: req.userId } }],
-        });
-        if (isExist) return next(new MyError(409, "Username has been used, please try another"));
-
         const hashedPassword = await brcyptjs.hash(password, 10);
 
         const updatedUser = await User.findByIdAndUpdate(

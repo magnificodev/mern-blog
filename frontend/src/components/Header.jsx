@@ -30,7 +30,6 @@ const Header = () => {
     });
 
     const handleSignOut = () => {
-        console.log("Sign out");
         mutationSignOut.mutate();
     };
 

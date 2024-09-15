@@ -12,15 +12,20 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-import { updateSuccess, deleteSuccess, signOutSuccess } from "../redux/user/userSlice";
-import { deleteUser, updateUser } from "../api/user";
+import {
+    updateSuccess,
+    deleteSuccess,
+    signOutSuccess,
+} from "../redux/user/userSlice";
+import { deleteUser, updateUser } from "../api/users";
 import { signOut } from "../api/auth";
 
 const DashProfile = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [imageFile, setImageFile] = useState(null);
     const [imageFileUrl, setImageFileUrl] = useState(null);
-    const [imageFileUploadProgress, setImageFileUploadProgress] = useState(null);
+    const [imageFileUploadProgress, setImageFileUploadProgress] =
+        useState(null);
     const [imageFileUploadError, setImageFileUploadError] = useState(null);
     const [imageFileUploading, setImageFileUploading] = useState(false);
     const [isImageUpdated, setIsImageUpdated] = useState(false);
@@ -80,7 +85,9 @@ const DashProfile = () => {
 
     // Handle submiting form
     const onSubmit = (userData) => {
-        userData.profilePic = imageFileUrl ? imageFileUrl : currentUser.profilePic;
+        userData.profilePic = imageFileUrl
+            ? imageFileUrl
+            : currentUser.profilePic;
         mutationUpdateUser.mutate(userData);
     };
 
@@ -114,11 +121,14 @@ const DashProfile = () => {
         uploadTask.on(
             "state_changed",
             (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                const progress =
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 setImageFileUploadProgress(progress.toFixed(0));
             },
             (error) => {
-                setImageFileUploadError("Couldn't upload image (File size must be < 2MB)");
+                setImageFileUploadError(
+                    "Couldn't upload image (File size must be < 2MB)"
+                );
                 setImageFileUploadProgress(null);
                 setImageFileUploading(false);
                 setImageFileUrl(null);
@@ -140,7 +150,10 @@ const DashProfile = () => {
     return (
         <div className="mx-auto max-w-lg p-3 w-full">
             <h1 className="text-center my-7 text-3xl font-semibold">Profile</h1>
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+            <form
+                className="flex flex-col gap-4"
+                onSubmit={handleSubmit(onSubmit)}
+            >
                 <input
                     type="file"
                     accept="image/*"
@@ -168,7 +181,9 @@ const DashProfile = () => {
                                     left: 0,
                                 },
                                 path: {
-                                    stroke: `rgba(62, 152, 199, ${imageFileUploadProgress / 100})`,
+                                    stroke: `rgba(62, 152, 199, ${
+                                        imageFileUploadProgress / 100
+                                    })`,
                                 },
                             }}
                         />
@@ -177,12 +192,16 @@ const DashProfile = () => {
                         src={imageFileUrl || currentUser.profilePic}
                         alt="user"
                         className={`rounded-full w-full h-full border-8 border-[lightgray] object-cover shadow-md ${
-                            imageFileUploadProgress && imageFileUploadProgress < 100 && "opacity-60"
+                            imageFileUploadProgress &&
+                            imageFileUploadProgress < 100 &&
+                            "opacity-60"
                         }`}
                     />
                 </div>
                 {imageFileUploadError && (
-                    <p className="text-center text-red-700 text-sm">{imageFileUploadError}</p>
+                    <p className="text-center text-red-700 text-sm">
+                        {imageFileUploadError}
+                    </p>
                 )}
                 <TextInput
                     type="text"
@@ -207,7 +226,9 @@ const DashProfile = () => {
                     type="submit"
                     gradientDuoTone="purpleToBlue"
                     outline
-                    disabled={(!isDirty || imageFileUploading) && !isImageUpdated}
+                    disabled={
+                        (!isDirty || imageFileUploading) && !isImageUpdated
+                    }
                 >
                     {mutationUpdateUser.isPending ? (
                         <>
@@ -224,13 +245,17 @@ const DashProfile = () => {
                         gradientDuoTone="purpleToPink"
                         as={Link}
                         to="/create-post"
+                        className="focus:z-10 focus:outline-none focus:ring-4 focus:ring-purple-200 hover:bg-gradient-to-l dark:focus:ring-purple-800"
                     >
                         Create a post
                     </Button>
                 )}
             </form>
             <div className="flex justify-between text-red-500 mt-5">
-                <span className="cursor-pointer" onClick={() => setOpenModal(true)}>
+                <span
+                    className="cursor-pointer"
+                    onClick={() => setOpenModal(true)}
+                >
                     Delete Account
                 </span>
                 <span className="cursor-pointer" onClick={handleSignOut}>
@@ -246,7 +271,12 @@ const DashProfile = () => {
                     {mutationUpdateUser.data?.message}
                 </Alert>
             ) : null}
-            <Modal show={openModal} size="md" onClose={() => setOpenModal(false)} popup>
+            <Modal
+                show={openModal}
+                size="md"
+                onClose={() => setOpenModal(false)}
+                popup
+            >
                 <Modal.Header />
                 <Modal.Body>
                     <div className="text-center">
@@ -259,13 +289,18 @@ const DashProfile = () => {
                                 {mutationDeleteUser.isPending ? (
                                     <>
                                         <Spinner size="sm" />
-                                        <span className="ml-2">Updating...</span>
+                                        <span className="ml-2">
+                                            Updating...
+                                        </span>
                                     </>
                                 ) : (
                                     "Yes, I'm sure"
                                 )}
                             </Button>
-                            <Button color="gray" onClick={() => setOpenModal(false)}>
+                            <Button
+                                color="gray"
+                                onClick={() => setOpenModal(false)}
+                            >
                                 No, cancel
                             </Button>
                         </div>

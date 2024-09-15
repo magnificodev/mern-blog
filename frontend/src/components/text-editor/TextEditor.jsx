@@ -6,6 +6,7 @@ import TaskItem from "@tiptap/extension-task-item";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
 import Toolbar from "./Toolbar";
 import "./TextEditor.scss";
 
@@ -26,9 +27,12 @@ const extensions = [
         defaultProtocol: "https",
     }),
     Image,
+    Placeholder.configure({
+        placeholder: "Write something...",
+    }),
 ];
 
-const content = "<p>Hello World!</p>";
+const content = "";
 
 const TextEditor = () => {
     const editor = useEditor({
