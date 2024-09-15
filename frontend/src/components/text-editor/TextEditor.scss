@@ -79,7 +79,7 @@
 
     a {
         text-decoration: underline;
-        color: blue;
+        color: #4995c7;
         cursor: pointer;
 
         &:active,
@@ -88,8 +88,17 @@
         }
     }
 
+    img {
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+        border-radius: 8px;
+    }
+
     code {
         background-color: #1e293b;
+        border: 1px solid rgb(61,69,83);
         color: #f8f8f2;
         padding: 0.2em 0.4em;
         border-radius: 4px;
@@ -100,6 +109,7 @@
     pre {
         margin: 0.5rem 0;
         background-color: #1e293b;
+        border: 1px solid rgb(61,69,83);
         color: #61dafb;
         padding: 1em;
         border-radius: 4px;
@@ -112,6 +122,7 @@
 
     pre code {
         background-color: transparent;
+        border: none;
         color: inherit;
         padding: 0;
         white-space: pre-wrap;
@@ -128,7 +139,6 @@
     }
 
     hr {
-        margin: 1rem 0;
     }
 
     blockquote {
@@ -137,20 +147,16 @@
         margin: 1rem 1rem 1rem 1.5rem;
         padding: 0.5rem 0.5rem 0.5rem 1rem;
         font-style: italic;
-        background-color: rgba(#0d0d0d, 0.05);
+        background-color: rgba(6, 148, 162, 0.1);
         border-radius: 4px;
-    }
-
-    .dark {
-        blockquote {
-            border-left-color: #61dafb;
-        }
     }
 
     hr {
         border: none;
+        border-radius: 2px;
         border-top: 2px solid rgba(#0d0d0d, 0.1);
-        margin: 2rem 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        margin: 1.5rem 0;
     }
 
     ul[data-type="taskList"] {

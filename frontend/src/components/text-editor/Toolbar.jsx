@@ -167,6 +167,20 @@ const Toolbar = ({ editor }) => {
             },
             isActive: () => editor.isActive("link"),
         },
+        {
+            icon: "image-line",
+            title: "Image",
+            action: (e) => {
+                e.preventDefault();
+
+                const url = window.prompt("URL");
+
+                if (url) {
+                    editor.chain().focus().setImage({ src: url }).run();
+                }
+            },
+            isActive: () => editor.isActive("link"),
+        },
     ];
     return (
         <div className="flex flex-wrap flex-[0_0_auto] items-center bg-teal-500 p-1">

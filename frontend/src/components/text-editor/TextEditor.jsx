@@ -5,6 +5,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Toolbar from "./Toolbar";
 import "./TextEditor.scss";
 
@@ -24,6 +25,7 @@ const extensions = [
         linkOnPaste: true,
         defaultProtocol: "https",
     }),
+    Image,
 ];
 
 const content = "<p>Hello World!</p>";
