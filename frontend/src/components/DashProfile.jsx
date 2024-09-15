@@ -24,10 +24,10 @@ const DashProfile = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [imageFile, setImageFile] = useState(null);
     const [imageFileUrl, setImageFileUrl] = useState(null);
-    const [imageFileUploadProgress, setImageFileUploadProgress] =
+    const [imageUploadProgress, setImageUploadProgress] =
         useState(null);
-    const [imageFileUploadError, setImageFileUploadError] = useState(null);
-    const [imageFileUploading, setImageFileUploading] = useState(false);
+    const [imageUploadError, setImageUploadError] = useState(null);
+    const [imageUploading, setImageUploading] = useState(false);
     const [isImageUpdated, setIsImageUpdated] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const filePickerRef = useRef();
@@ -54,7 +54,7 @@ const DashProfile = () => {
         onSuccess: (data) => {
             dispatch(updateSuccess(data.data.user));
             setIsImageUpdated(false);
-            setImageFileUploadProgress(null);
+            setImageUploadProgress(null);
             reset({
                 userId: data.data.user._id,
                 username: data.data.user.username,
@@ -110,11 +110,11 @@ const DashProfile = () => {
 
     // Upload image on firebase
     const uploadImage = async () => {
-        setImageFileUploading(true);
-        setImageFileUploadProgress(null);
-        setImageFileUploadError(null);
+        setImageUploading(true);
+        setImageUploadProgress(null);
+        setImageUploadError(null);
 
-        const fileName = new Date().getTime() + imageFile.name;
+        const fileName = new Date().getTime() + "_" + imageFile.name;
         const storageRef = ref(storage, fileName);
         const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
@@ -123,20 +123,20 @@ const DashProfile = () => {
             (snapshot) => {
                 const progress =
                     (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setImageFileUploadProgress(progress.toFixed(0));
+                setImageUploadProgress(progress.toFixed(0));
             },
             (error) => {
-                setImageFileUploadError(
+                setImageUploadError(
                     "Couldn't upload image (File size must be < 2MB)"
                 );
-                setImageFileUploadProgress(null);
-                setImageFileUploading(false);
+                setImageUploadProgress(null);
+                setImageUploading(false);
                 setImageFileUrl(null);
             },
             () =>
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
                     setImageFileUrl(downloadUrl);
-                    setImageFileUploading(false);
+                    setImageUploading(false);
                     setIsImageUpdated(true);
                 })
         );
@@ -167,10 +167,10 @@ const DashProfile = () => {
                     className="w-32 h-32 self-center cursor-pointer relative"
                     onClick={() => filePickerRef.current.click()}
                 >
-                    {imageFileUploadProgress && (
+                    {imageUploadProgress && (
                         <CircularProgressbar
-                            value={imageFileUploadProgress || 0}
-                            text={`${imageFileUploadProgress}%`}
+                            value={imageUploadProgress || 0}
+                            text={`${imageUploadProgress}%`}
                             strokeWidth={6}
                             styles={{
                                 root: {
@@ -182,7 +182,7 @@ const DashProfile = () => {
                                 },
                                 path: {
                                     stroke: `rgba(62, 152, 199, ${
-                                        imageFileUploadProgress / 100
+                                        imageUploadProgress / 100
                                     })`,
                                 },
                             }}
@@ -192,15 +192,15 @@ const DashProfile = () => {
                         src={imageFileUrl || currentUser.profilePic}
                         alt="user"
                         className={`rounded-full w-full h-full border-8 border-[lightgray] object-cover shadow-md ${
-                            imageFileUploadProgress &&
-                            imageFileUploadProgress < 100 &&
+                            imageUploadProgress &&
+                            imageUploadProgress < 100 &&
                             "opacity-60"
                         }`}
                     />
                 </div>
-                {imageFileUploadError && (
+                {imageUploadError && (
                     <p className="text-center text-red-700 text-sm">
-                        {imageFileUploadError}
+                        {imageUploadError}
                     </p>
                 )}
                 <TextInput
@@ -227,7 +227,7 @@ const DashProfile = () => {
                     gradientDuoTone="purpleToBlue"
                     outline
                     disabled={
-                        (!isDirty || imageFileUploading) && !isImageUpdated
+                        (!isDirty || imageUploading) && !isImageUpdated
                     }
                 >
                     {mutationUpdateUser.isPending ? (
