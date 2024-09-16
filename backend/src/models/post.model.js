@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const postSchema = mongoose.Schema(
+const postSchema = new mongoose.Schema(
     {
         userId: {
             type: String,
@@ -10,6 +10,7 @@ const postSchema = mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+            trim: true,
         },
         content: {
             type: String,
@@ -28,6 +29,7 @@ const postSchema = mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+            trim: true,
         },
     },
     { timestamps: true }

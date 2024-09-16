@@ -1,6 +1,7 @@
 import { MyError } from "../utils/error.handler.js";
 import Post from "../models/post.model.js";
 import { validationResult } from "express-validator";
+import slugify from "slugify";
 
 export const createPost = async (req, res, next) => {
     try {
@@ -16,11 +17,11 @@ export const createPost = async (req, res, next) => {
             return next(new MyError(400, errors.errors[0].msg));
         } // 400 Bad Request
 
-        const slug = req.body.title
-            .split(" ")
-            .join("-")
-            .toLowerCase()
-            .replace(/[^a-zA-Z0-9-]/g, "");
+        const slug = slugify(req.body.title, {
+            lower: true,
+            strict: true,
+            locale: "vi",
+        });
 
         const newPost = new Post({
             ...req.body,
