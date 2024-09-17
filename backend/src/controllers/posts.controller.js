@@ -45,7 +45,7 @@ export const createPost = async (req, res, next) => {
 
 export const getPosts = async (req, res, next) => {
     try {
-        const skip = parseInt(req.query.startIndex) || 0;
+        const skip = parseInt(req.query.skip) || 0;
         const limit = parseInt(req.query.limit) || 5;
         const order = req.query.order === "asc" ? 1 : -1;
 

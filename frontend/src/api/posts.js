@@ -20,13 +20,19 @@ export const createPost = async (postData) => {
     }
 };
 
-export const getPosts = async (userId) => {
+export const getPosts = async ({ pageParam, userId, limit = 5 }) => {
     try {
-        const response = await fetch(`/api/posts?userId=${userId}`);
+        const response = await fetch(
+            `/api/posts?userId=${userId}&skip=${
+                (pageParam - 1) * limit
+            }&limit=${limit}`
+        );
+
         const responseBody = await response.json();
         if (responseBody.status === "failure") {
             throw new Error(responseBody.message);
         }
+        
         return responseBody;
     } catch (err) {
         throw new Error(err.message);

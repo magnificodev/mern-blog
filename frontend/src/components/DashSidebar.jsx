@@ -26,7 +26,7 @@ const DashSidebar = () => {
     }, [location]);
 
     return (
-        <Sidebar className="w-full">
+        <Sidebar className="w-full shadow-md">
             <Sidebar.Items>
                 <Sidebar.ItemGroup className="flex flex-col gap-1">
                     {currentUser.isAdmin && (
