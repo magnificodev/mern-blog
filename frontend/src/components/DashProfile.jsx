@@ -1,16 +1,14 @@
 import { Button, TextInput, Alert, Spinner, Modal } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useState, useRef, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../firebase/firebaseConfig";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import {
     updateSuccess,
@@ -24,13 +22,15 @@ const DashProfile = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [imageFile, setImageFile] = useState(null);
     const [imageFileUrl, setImageFileUrl] = useState(null);
-    const [imageUploadProgress, setImageUploadProgress] =
-        useState(null);
+    const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
     const [imageUploading, setImageUploading] = useState(false);
     const [isImageUpdated, setIsImageUpdated] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const filePickerRef = useRef();
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const {
         register,
@@ -45,9 +45,6 @@ const DashProfile = () => {
             password: "",
         },
     });
-
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     const mutationUpdateUser = useMutation({
         mutationFn: updateUser,
@@ -70,6 +67,7 @@ const DashProfile = () => {
     const mutationDeleteUser = useMutation({
         mutationFn: deleteUser,
         onSuccess: () => {
+            setOpenModal(false);
             dispatch(deleteSuccess());
             navigate("/");
         },
@@ -83,83 +81,64 @@ const DashProfile = () => {
         },
     });
 
-    // Handle submiting form
     const onSubmit = (userData) => {
-        userData.profilePic = imageFileUrl
-            ? imageFileUrl
-            : currentUser.profilePic;
+        userData.profilePic = imageFileUrl || currentUser.profilePic;
         mutationUpdateUser.mutate(userData);
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-
-        setImageFile(e.target.files[0]);
-        setImageFileUrl(URL.createObjectURL(file));
+        if (file) {
+            setImageFile(file);
+            setImageFileUrl(URL.createObjectURL(file));
+        }
     };
 
-    const handleSignOut = () => {
-        mutationSignOut.mutate();
-    };
-
-    const deleteAccount = () => {
-        mutationDeleteUser.mutate(currentUser._id);
-        setOpenModal(false);
-    };
-
-    // Upload image on firebase
     const uploadImage = async () => {
         setImageUploading(true);
         setImageUploadProgress(null);
         setImageUploadError(null);
 
-        const fileName = new Date().getTime() + "_" + imageFile.name;
+        const fileName = `${new Date().getTime()}_${imageFile.name}`;
         const storageRef = ref(storage, fileName);
         const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
         uploadTask.on(
             "state_changed",
             (snapshot) => {
-                const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 setImageUploadProgress(progress.toFixed(0));
             },
             (error) => {
-                setImageUploadError(
-                    "Couldn't upload image (File size must be < 2MB)"
-                );
+                setImageUploadError("Couldn't upload image (File size must be < 2MB)");
                 setImageUploadProgress(null);
                 setImageUploading(false);
                 setImageFileUrl(null);
             },
-            () =>
+            () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
                     setImageFileUrl(downloadUrl);
                     setImageUploading(false);
                     setIsImageUpdated(true);
-                })
+                });
+            }
         );
     };
 
     useEffect(() => {
-        if (!imageFile) return;
-        uploadImage();
+        if (imageFile) {
+            uploadImage();
+        }
     }, [imageFile]);
 
     return (
         <div className="mx-auto max-w-lg p-3 w-full">
             <h1 className="text-center my-7 text-3xl font-semibold">Profile</h1>
-            <form
-                className="flex flex-col gap-4"
-                onSubmit={handleSubmit(onSubmit)}
-            >
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
                 <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                        handleImageChange(e);
-                    }}
+                    onChange={handleImageChange}
                     ref={filePickerRef}
                     hidden
                 />
@@ -181,9 +160,7 @@ const DashProfile = () => {
                                     left: 0,
                                 },
                                 path: {
-                                    stroke: `rgba(62, 152, 199, ${
-                                        imageUploadProgress / 100
-                                    })`,
+                                    stroke: `rgba(62, 152, 199, ${imageUploadProgress / 100})`,
                                 },
                             }}
                         />
@@ -192,16 +169,12 @@ const DashProfile = () => {
                         src={imageFileUrl || currentUser.profilePic}
                         alt="user"
                         className={`rounded-full w-full h-full border-8 border-[lightgray] object-cover shadow-md ${
-                            imageUploadProgress &&
-                            imageUploadProgress < 100 &&
-                            "opacity-60"
+                            imageUploadProgress && imageUploadProgress < 100 && "opacity-60"
                         }`}
                     />
                 </div>
                 {imageUploadError && (
-                    <p className="text-center text-red-700 text-sm">
-                        {imageUploadError}
-                    </p>
+                    <p className="text-center text-red-700 text-sm">{imageUploadError}</p>
                 )}
                 <TextInput
                     type="text"
@@ -226,9 +199,7 @@ const DashProfile = () => {
                     type="submit"
                     gradientDuoTone="purpleToBlue"
                     outline
-                    disabled={
-                        (!isDirty || imageUploading) && !isImageUpdated
-                    }
+                    disabled={(!isDirty || imageUploading) && !isImageUpdated}
                 >
                     {mutationUpdateUser.isPending ? (
                         <>
@@ -252,31 +223,24 @@ const DashProfile = () => {
                 )}
             </form>
             <div className="flex justify-between text-red-500 mt-5">
-                <span
-                    className="cursor-pointer"
-                    onClick={() => setOpenModal(true)}
-                >
+                <span className="cursor-pointer" onClick={() => setOpenModal(true)}>
                     Delete Account
                 </span>
-                <span className="cursor-pointer" onClick={handleSignOut}>
+                <span className="cursor-pointer" onClick={() => mutationSignOut.mutate()}>
                     Sign out
                 </span>
             </div>
-            {mutationUpdateUser.isError ? (
+            {mutationUpdateUser.isError && (
                 <Alert className="mt-5" color="failure">
                     {mutationUpdateUser.error.message}
                 </Alert>
-            ) : mutationUpdateUser.data ? (
+            )}
+            {mutationUpdateUser.data && (
                 <Alert className="mt-5" color="success">
                     {mutationUpdateUser.data?.message}
                 </Alert>
-            ) : null}
-            <Modal
-                show={openModal}
-                size="md"
-                onClose={() => setOpenModal(false)}
-                popup
-            >
+            )}
+            <Modal show={openModal} size="md" onClose={() => setOpenModal(false)} popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className="text-center">
@@ -285,22 +249,17 @@ const DashProfile = () => {
                             Are you sure you want to delete your account?
                         </h3>
                         <div className="flex justify-center gap-4">
-                            <Button color="failure" onClick={deleteAccount}>
+                            <Button color="failure" onClick={() => mutationDeleteUser.mutate(currentUser._id)}>
                                 {mutationDeleteUser.isPending ? (
                                     <>
                                         <Spinner size="sm" />
-                                        <span className="ml-2">
-                                            Updating...
-                                        </span>
+                                        <span className="ml-2">Deleting...</span>
                                     </>
                                 ) : (
                                     "Yes, I'm sure"
                                 )}
                             </Button>
-                            <Button
-                                color="gray"
-                                onClick={() => setOpenModal(false)}
-                            >
+                            <Button color="gray" onClick={() => setOpenModal(false)}>
                                 No, cancel
                             </Button>
                         </div>

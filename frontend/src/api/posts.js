@@ -32,7 +32,25 @@ export const getPosts = async ({ pageParam, userId, limit = 5 }) => {
         if (responseBody.status === "failure") {
             throw new Error(responseBody.message);
         }
-        
+
+        return responseBody;
+    } catch (err) {
+        throw new Error(err.message);
+    }
+};
+
+export const deletePost = async (postId) => {
+    try {
+        const response = await fetch(`/api/posts/${postId}`, {
+            method: "DELETE",
+        });
+
+        const responseBody = await response.json();
+
+        if (responseBody.status === "failure") {
+            throw new Error(responseBody.message);
+        }
+
         return responseBody;
     } catch (err) {
         throw new Error(err.message);

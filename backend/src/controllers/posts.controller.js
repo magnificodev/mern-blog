@@ -56,8 +56,13 @@ export const getPosts = async (req, res, next) => {
             ...(req.query.postId && { _id: req.query.postId }),
             ...(req.query.searchTerm && {
                 $or: [
-                    { title: { $regex: req.query.searchTerm, $option: "i" } },
-                    { content: { $regex: req.query.searchTerm, $option: "i" } },
+                    { title: { $regex: req.query.searchTerm, $options: "i" } },
+                    {
+                        content: {
+                            $regex: req.query.searchTerm,
+                            $options: "i",
+                        },
+                    },
                 ],
             }),
         })
@@ -92,3 +97,27 @@ export const getPosts = async (req, res, next) => {
         next(err);
     }
 };
+
+export const deletePost = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.postId);
+
+        if (!post) {
+            return next(new MyError(404, "Post not found"));
+        }
+
+        if (req.userId !== post.userId && !req.isAdmin) {
+            return next(new MyError(403, "You are not allowed to delete this post"));
+        }
+
+        await Post.findByIdAndDelete(req.params.postId);
+
+        res.status(200).json({
+            status: "success",
+            message: "The post has been deleted successfully",
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
