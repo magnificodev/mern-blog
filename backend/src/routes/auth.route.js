@@ -1,6 +1,6 @@
 import express from "express";
 
-import { SignUp, SignIn, GoogleAuth, SignOut } from "../controllers/auth.controller.js";
+import { signUp, signIn, googleAuth, signOut } from "../controllers/auth.controller.js";
 import {
     signUpValidator,
     signInValidator,
@@ -9,9 +9,9 @@ import verifyToken from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/signup", signUpValidator, SignUp);
-router.post("/signin", signInValidator, SignIn);
-router.post("/google", GoogleAuth);
-router.post("/signout", SignOut);
+router.post("/signup", signUpValidator, signUp);
+router.post("/signin", signInValidator, signIn);
+router.post("/google", googleAuth);
+router.post("/signout", signOut);
 
 export default router;

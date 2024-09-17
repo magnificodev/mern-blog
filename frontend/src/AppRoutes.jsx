@@ -1,31 +1,43 @@
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+
 import Home from "./pages/Home";
 import About from "./pages/About";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
-import Dashboard from "./pages/Dashboard";
-import Projects from "./pages/Projects";
 import Layout from "./layouts/Layout";
+import Projects from "./pages/Projects";
+import PostPage from "./pages/PostPage";
+import Dashboard from "./pages/Dashboard";
+import CreatePost from "./pages/CreatePost";
+import UpdatePost from "./pages/UpdatePost";
 import PrivateRoute from "./components/PrivateRoute";
 import OnlyAdminPrivateRoute from "./components/OnlyAdminPrivateRoute";
-import CreatePost from "./pages/CreatePost";
 
-const App = () => {
+const AppRoutes = () => {
     return (
         <Routes>
-            <Route path="/" element={<Layout><Home /></Layout>} />
-            <Route path="/about" element={<Layout><About /></Layout>} />
-            <Route path="/sign-up" element={<Layout ><SignUp /></Layout>} />
-            <Route path="/sign-in" element={<Layout ><SignIn /></Layout>} />
-            <Route element={<PrivateRoute />}>
-                <Route path="/dashboard" element={<Layout><Dashboard /></Layout>}/>
+            <Route element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/sign-up" element={<SignUp />} />
+                <Route path="/sign-in" element={<SignIn />} />
+                <Route path="/projects" element={<Projects />} />
+
+                <Route element={<PrivateRoute />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
+
+                <Route element={<OnlyAdminPrivateRoute />}>
+                    <Route path="/create-post" element={<CreatePost />} />
+                    <Route
+                        path="/update-post/:postId"
+                        element={<UpdatePost />}
+                    />
+                </Route>
+                <Route path="/post/:postSlug" element={<PostPage />} />
             </Route>
-            <Route element={<OnlyAdminPrivateRoute />}>
-                <Route path="/create-post" element={<Layout><CreatePost /></Layout>}/>
-            </Route>
-            <Route path="/projects" element={<Layout><Projects /></Layout>} />
         </Routes>
     );
 };
 
-export default App;
+export default AppRoutes;

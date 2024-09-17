@@ -8,7 +8,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import Toolbar from "./Toolbar";
-import "./TextEditor.scss";
+import "../../styles/text-editor/TextEditor.scss";
 import { useEffect } from "react";
 
 const extensions = [
@@ -35,12 +35,12 @@ const extensions = [
 
 const content = "";
 
-const TextEditor = ({ register, setValue, errors }) => {
+const TextEditor = ({ register, setValue, initialValue = "" }) => {
     const editor = useEditor({
         extensions,
-        content,
+        content: initialValue,
         onUpdate: ({ editor }) => {
-            setValue("content", editor.getHTML());
+            setValue("content", editor.getHTML(), { shouldDirty: true });
         },
     });
 

@@ -5,7 +5,7 @@ import { validationResult } from "express-validator";
 import User from "../models/user.model.js";
 import { MyError } from "../utils/error.handler.js";
 
-export const SignUp = async (req, res, next) => {
+export const signUp = async (req, res, next) => {
     try {
         const errors = validationResult(req);
 
@@ -35,7 +35,7 @@ export const SignUp = async (req, res, next) => {
     }
 };
 
-export const SignIn = async (req, res, next) => {
+export const signIn = async (req, res, next) => {
     try {
         const errors = validationResult(req);
 
@@ -88,7 +88,7 @@ export const SignIn = async (req, res, next) => {
     }
 };
 
-export const GoogleAuth = async (req, res, next) => {
+export const googleAuth = async (req, res, next) => {
     try {
         const { name, email, googlePhotoUrl } = req.body;
 
@@ -155,7 +155,7 @@ export const GoogleAuth = async (req, res, next) => {
     }
 };
 
-export const SignOut = async (req, res, next) => {
+export const signOut = async (req, res, next) => {
     try {
         res.clearCookie("accessToken").status(200).json({
             status: "success",

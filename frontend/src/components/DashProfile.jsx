@@ -41,7 +41,6 @@ const DashProfile = () => {
         defaultValues: {
             userId: currentUser._id,
             username: currentUser.username,
-            email: currentUser.email,
             password: "",
         },
     });
@@ -55,7 +54,6 @@ const DashProfile = () => {
             reset({
                 userId: data.data.user._id,
                 username: data.data.user.username,
-                email: data.data.user.email,
                 password: "",
             });
         },
@@ -186,7 +184,7 @@ const DashProfile = () => {
                     type="text"
                     id="email"
                     placeholder="Email"
-                    {...register("email")}
+                    defaultValue={currentUser.email}
                     disabled
                 />
                 <TextInput

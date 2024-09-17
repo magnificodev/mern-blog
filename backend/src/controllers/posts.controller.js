@@ -71,6 +71,7 @@ export const getPosts = async (req, res, next) => {
             .sort({ updatedAt: order });
 
         const totalPosts = await Post.countDocuments();
+        const totalPages = Math.ceil(totalPosts / limit);
 
         const now = new Date();
 
@@ -90,6 +91,7 @@ export const getPosts = async (req, res, next) => {
             data: {
                 posts,
                 totalPosts,
+                totalPages,
                 lastMonthPosts,
             },
         });
@@ -97,6 +99,62 @@ export const getPosts = async (req, res, next) => {
         next(err);
     }
 };
+
+export const getPost = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.postId);
+
+        if (!post) {
+            return next(new MyError(404, "Post not found"));
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Get the post successfully!",
+            data: {
+                post,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updatePost = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.postId);
+
+        if (!post) {
+            return next(new MyError(404, "Post not found"));
+        }
+
+        if (req.userId !== post.userId && !req.isAdmin) {
+            return next(
+                new MyError(403, "You are not allowed to update this post")
+            );
+        }
+        
+        const updatedPost = await Post.findByIdAndUpdate(req.params.postId, {
+            ...req.body,
+            slug: slugify(req.body.title, {
+                lower: true,
+                strict: true,
+                locale: "vi",
+            }),
+        }, { new: true });
+        
+        res.status(200).json({
+            status: "success",
+            message: "The post has been updated successfully",
+            data: {
+                post: updatedPost,
+            },
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+}
 
 export const deletePost = async (req, res, next) => {
     try {
@@ -107,7 +165,9 @@ export const deletePost = async (req, res, next) => {
         }
 
         if (req.userId !== post.userId && !req.isAdmin) {
-            return next(new MyError(403, "You are not allowed to delete this post"));
+            return next(
+                new MyError(403, "You are not allowed to delete this post")
+            );
         }
 
         await Post.findByIdAndDelete(req.params.postId);
@@ -120,4 +180,3 @@ export const deletePost = async (req, res, next) => {
         next(err);
     }
 };
-

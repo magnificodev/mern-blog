@@ -3,10 +3,39 @@ import User from "../models/user.model.js";
 import brcyptjs from "bcryptjs";
 import { validationResult } from "express-validator";
 
-export const UpdateUser = async (req, res, next) => {
+export const getUsers = async (req, res, next) => {
+    try {
+        if (!req.isAdmin)
+            return next(new MyError(403, "You are not allowed to access this"));
+
+        const skip = parseInt(req.query.skip) || 0;
+        const limit = parseInt(req.query.limit) || 5;
+        const order = req.query.order === "asc" ? 1 : -1;
+
+        const users = await User.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: order });
+
+        const totalUsers = await User.countDocuments();
+        const totalPages = Math.ceil(totalUsers / limit);
+
+        res.status(200).json({
+            status: "success",
+            message: "Users fetched successfully",
+            data: { users, totalPages },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateUser = async (req, res, next) => {
     try {
         if (req.userId !== req.params.userId)
-            return next(new MyError(403, "You are not allowed to update this user"));
+            return next(
+                new MyError(403, "You are not allowed to update this user")
+            );
 
         const errors = validationResult(req);
 
@@ -14,7 +43,7 @@ export const UpdateUser = async (req, res, next) => {
             return next(new MyError(400, errors.errors[0].msg));
         } // 400 Bad Request
 
-        const { username, email, password, profilePic } = req.body;
+        const { username, password, profilePic } = req.body;
 
         const hashedPassword = await brcyptjs.hash(password, 10);
 
@@ -23,7 +52,6 @@ export const UpdateUser = async (req, res, next) => {
             {
                 $set: {
                     username,
-                    email,
                     password: hashedPassword,
                     profilePic,
                 },
@@ -45,16 +73,19 @@ export const UpdateUser = async (req, res, next) => {
     }
 };
 
-export const DeleteUser = async (req, res, next) => {
+export const deleteUser = async (req, res, next) => {
     try {
         if (req.userId !== req.params.userId)
-            return next(new MyError(403, "You are not allowed to delete this user"));
+            return next(
+                new MyError(403, "You are not allowed to delete this user")
+            );
 
-        await User.findByIdAndDelete(req.params.userId)
+        await User.findByIdAndDelete(req.params.userId);
+
         res.status(200).json({
             status: "success",
             message: "User has been deleted!",
-        })
+        });
     } catch (err) {
         next(err);
     }

@@ -9,7 +9,9 @@ export const updateValidator = [
         .withMessage(
             "Username can only include letters, numbers, and underscores"
         ),
-    body("email").isEmpty().withMessage("Email is not allowed to update!"),
+    body("email")
+        .isEmpty()
+        .withMessage("Email is not allowed to update!"),
     body("password")
         .optional({ checkFalsy: true })
         .isLength({ min: 6 })
