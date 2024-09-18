@@ -15,7 +15,7 @@ import { storage } from "../firebase/firebaseConfig";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { updatePost, getPost } from "../api/posts";
+import { updatePost, getPosts } from "../api/posts";
 
 const UpdatePost = () => {
     const { postId } = useParams();
@@ -34,18 +34,20 @@ const UpdatePost = () => {
         formState: { isDirty },
     } = useForm();
 
-    const { data: postData, isLoading } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["post", postId],
-        queryFn: () => getPost(postId),
+        queryFn: () => getPosts({ postId: postId }),
     });
+
+    const postData = data?.data.posts[0];
 
     useEffect(() => {
         if (postData) {
-            setValue("title", postData.data.post.title);
-            setValue("content", postData.data.post.content);
-            setValue("category", postData.data.post.category);
-            setValue("image", postData.data.post.image);
-            setImageFileUrl(postData.data.post.image);
+            setValue("title", postData.title);
+            setValue("content", postData.content);
+            setValue("category", postData.category);
+            setValue("image", postData.image);
+            setImageFileUrl(postData.image);
             setCanUpload(false);
         }
     }, [postData, setValue]);
@@ -105,13 +107,12 @@ const UpdatePost = () => {
     if (isLoading) return <Spinner />;
 
     const watchedFields = watch();
-    const isFormModified =
-        isDirty || imageFileUrl !== postData?.data.post.image;
+    const isFormModified = isDirty || imageFileUrl !== postData?.image;
     const isFormUnchanged =
-        watchedFields.title === postData?.data.post.title &&
-        watchedFields.content === postData?.data.post.content &&
-        watchedFields.category === postData?.data.post.category &&
-        imageFileUrl === postData?.data.post.image;
+        watchedFields.title === postData?.title &&
+        watchedFields.content === postData?.content &&
+        watchedFields.category === postData?.category &&
+        imageFileUrl === postData?.image;
 
     return (
         <div className="p-3 max-w-3xl mx-auto min-h-screen">
@@ -187,14 +188,14 @@ const UpdatePost = () => {
                     <Alert color="failure">{imageUploadError}</Alert>
                 )}
                 <img
-                    src={imageFileUrl || postData?.data.post.image}
+                    src={imageFileUrl || postData?.image}
                     alt="Image"
                     className="w-full h-72 object-cover"
                 />
                 <TextEditor
                     register={register}
                     setValue={setValue}
-                    initialValue={postData?.data.post.content}
+                    initialValue={postData?.content}
                 />
                 <Button
                     type="submit"

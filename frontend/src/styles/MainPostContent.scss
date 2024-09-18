@@ -1,26 +1,6 @@
-/* Basic editor styles */
-.tiptap {
+.main-content {
     padding: 0.25rem 0.5rem;
     outline: none;
-    min-height: 26rem;
-    max-height: 32rem;
-    overflow-y: scroll;
-
-    &::-webkit-scrollbar {
-        width: 0.5rem;
-        height: 0.5rem;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: #ccc;
-        // border-radius: 10px;
-        // border: 2px solid #f0f0f0;
-        cursor: default;
-
-        &:hover {
-            background-color: #aaa;
-        }
-    }
 
     > * + * {
         margin-top: 0.75em;

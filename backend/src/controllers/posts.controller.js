@@ -100,26 +100,6 @@ export const getPosts = async (req, res, next) => {
     }
 };
 
-export const getPost = async (req, res, next) => {
-    try {
-        const post = await Post.findById(req.params.postId);
-
-        if (!post) {
-            return next(new MyError(404, "Post not found"));
-        }
-
-        res.status(200).json({
-            status: "success",
-            message: "Get the post successfully!",
-            data: {
-                post,
-            },
-        });
-    } catch (err) {
-        next(err);
-    }
-};
-
 export const updatePost = async (req, res, next) => {
     try {
         const post = await Post.findById(req.params.postId);

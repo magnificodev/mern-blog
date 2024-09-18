@@ -20,19 +20,32 @@ export const createPost = async (postData) => {
     }
 };
 
-export const getPosts = async ({ pageParam = 1, limit = 5, userId } = {}) => {
+export const getPosts = async ({
+    pageParam,
+    userId,
+    skip,
+    limit,
+    slug,
+    postId,
+    searchTerm,
+} = {}) => {
     try {
         const url = new URL("/api/posts", window.location.origin);
 
-        if (userId !== undefined) {
-            url.searchParams.append("userId", userId);
-        }
-        if (pageParam !== undefined && limit !== null) {
-            url.searchParams.append("skip", (pageParam - 1) * limit);
-        }
-        if (limit !== null) {
-            url.searchParams.append("limit", limit);
-        }
+        const params = {
+            userId,
+            skip: skip || (pageParam - 1) * limit,
+            limit,
+            slug,
+            postId,
+            searchTerm,
+        };
+
+        Object.keys(params).forEach((key) => {
+            if (params[key] !== undefined && params[key] !== null) {
+                url.searchParams.append(key, params[key]);
+            }
+        });
 
         const response = await fetch(url);
 
@@ -41,19 +54,6 @@ export const getPosts = async ({ pageParam = 1, limit = 5, userId } = {}) => {
             throw new Error(responseBody.message);
         }
 
-        return responseBody;
-    } catch (err) {
-        throw new Error(err.message);
-    }
-};
-
-export const getPost = async (postId) => {
-    try {
-        const response = await fetch(`/api/posts/${postId}`);
-        const responseBody = await response.json();
-        if (responseBody.status === "failure") {
-            throw new Error(responseBody.message);
-        }
         return responseBody;
     } catch (err) {
         throw new Error(err.message);

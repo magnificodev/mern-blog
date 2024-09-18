@@ -48,7 +48,12 @@ const DashPosts = () => {
         }
     }, [data]);
 
-    if (isLoading) return <Spinner />;
+    if (isLoading)
+        return (
+            <div className="flex items-center mx-auto">
+                <Spinner size="xl" />
+            </div>
+        );
     if (isError) return <p>There is something wrong</p>;
 
     return (
@@ -92,7 +97,12 @@ const DashPosts = () => {
                                                 {post.title}
                                             </Link>
                                         </Table.Cell>
-                                        <Table.Cell>{post.category}</Table.Cell>
+                                        <Table.Cell>
+                                            {post.category
+                                                .charAt(0)
+                                                .toUpperCase() +
+                                                post.category.slice(1)}
+                                        </Table.Cell>
                                         <Table.Cell>
                                             <span
                                                 onClick={() => {

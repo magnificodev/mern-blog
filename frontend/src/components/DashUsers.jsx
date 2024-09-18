@@ -43,7 +43,12 @@ function DashUsers() {
         }
     }, [data]);
 
-    if (isLoading) return <Spinner />;
+    if (isLoading)
+        return (
+            <div className="flex items-center mx-auto">
+                <Spinner size="xl" />
+            </div>
+        );
     if (isError) return <p>There is something wrong</p>;
 
     return (
