@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import AppRoutes from "./AppRoutes.jsx";
 import "./index.css";
 import { BrowserRouter as Router } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store, persistor } from "./redux/store.js";
 import { Provider } from "react-redux";
@@ -24,6 +25,7 @@ createRoot(document.getElementById("root")).render(
                 <Provider store={store}>
                     <ThemeProvider>
                         <Router>
+                            <ScrollToTop />
                             <AppRoutes />
                         </Router>
                     </ThemeProvider>

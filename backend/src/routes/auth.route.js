@@ -5,7 +5,6 @@ import {
     signUpValidator,
     signInValidator,
 } from "../validators/auth.validator.js";
-import verifyToken from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 

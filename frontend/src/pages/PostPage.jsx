@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Button } from "flowbite-react";
 import { format } from "date-fns";
 import CallToAction from "../components/CallToAction";
+import CommentSection from "../components/CommentSection";
 import "../styles/MainPostContent.scss";
 
 function PostPage() {
@@ -83,6 +84,7 @@ function PostPage() {
             <div className="max-w-4xl mx-auto w-full">
                 <CallToAction />
             </div>
+            <CommentSection postId={postData._id} />
         </main>
     );
 }

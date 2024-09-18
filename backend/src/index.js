@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import UserRoutes from "./routes/users.route.js";
 import AuthRoutes from "./routes/auth.route.js";
 import PostRoutes from "./routes/posts.route.js";
+import CommentRoutes from "./routes/comments.route.js";
 
 // Constant variables
 const PORT = process.env.PORT_NUMBER || 3000;
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", UserRoutes);
 app.use("/api/auth", AuthRoutes);
 app.use("/api/posts", PostRoutes);
+app.use("/api/comments", CommentRoutes);
 
 // Error handling middlewares
 app.use((err, req, res, next) => {
@@ -48,7 +50,6 @@ app.use((err, req, res, next) => {
         message = Object.values(err.errors)[0].message;
         statusCode = 400;
     }
-console.log(message)
     res.status(statusCode).json({
         status,
         message,
