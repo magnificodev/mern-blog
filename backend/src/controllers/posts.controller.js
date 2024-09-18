@@ -70,6 +70,10 @@ export const getPosts = async (req, res, next) => {
             .limit(limit)
             .sort({ updatedAt: order });
 
+        if (posts.length === 0) {
+            return next(new MyError(404, "Posts not found"));
+        }
+
         const totalPosts = await Post.countDocuments();
         const totalPages = Math.ceil(totalPosts / limit);
 
@@ -102,6 +106,12 @@ export const getPosts = async (req, res, next) => {
 
 export const updatePost = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return next(new MyError(400, errors.errors[0].msg));
+        } // 400 Bad Request
+
         const post = await Post.findById(req.params.postId);
 
         if (!post) {
@@ -113,16 +123,20 @@ export const updatePost = async (req, res, next) => {
                 new MyError(403, "You are not allowed to update this post")
             );
         }
-        
-        const updatedPost = await Post.findByIdAndUpdate(req.params.postId, {
-            ...req.body,
-            slug: slugify(req.body.title, {
-                lower: true,
-                strict: true,
-                locale: "vi",
-            }),
-        }, { new: true });
-        
+
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.postId,
+            {
+                ...req.body,
+                slug: slugify(req.body.title, {
+                    lower: true,
+                    strict: true,
+                    locale: "vi",
+                }),
+            },
+            { new: true }
+        );
+
         res.status(200).json({
             status: "success",
             message: "The post has been updated successfully",
@@ -130,11 +144,10 @@ export const updatePost = async (req, res, next) => {
                 post: updatedPost,
             },
         });
-    }
-    catch (err) {
+    } catch (err) {
         next(err);
     }
-}
+};
 
 export const deletePost = async (req, res, next) => {
     try {

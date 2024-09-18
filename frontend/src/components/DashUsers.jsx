@@ -32,14 +32,13 @@ function DashUsers() {
     });
 
     const handleDeleteUser = () => {
-        console.log(userIdToDelete);
         deleteUserMutate(userIdToDelete);
     };
 
     useEffect(() => {
         if (data) {
-            const newUsers = data.pages.flatMap((page) => page.data.users);
-            setUsers(newUsers);
+            const newUsers = data.pages.slice(-1).flatMap((page) => page.data.users);
+            setUsers(prev => [...prev, ...newUsers]);
         }
     }, [data]);
 

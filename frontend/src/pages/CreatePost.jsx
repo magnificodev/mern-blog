@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     TextInput,
     Select,
@@ -18,32 +18,37 @@ import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
     const [imageFile, setImageFile] = useState(null);
-    const [imageFileUrl, setImageFileUrl] = useState(null);
     const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
-    const [canUpload, setCanUpload] = useState(false);
 
     const {
         register,
         setValue,
+        getValues,
         handleSubmit,
-    } = useForm();
-    
+        formState: { isDirty },
+    } = useForm({
+        defaultValues: {
+            title: "",
+            category: "uncategorized",
+            content: "",
+        },
+    });
+
     const navigate = useNavigate();
 
     const createPostMutation = useMutation({
         mutationFn: createPost,
         onSuccess: (data) => {
-            navigate(`/post/${data.data.post.slug}`)
+            navigate(`/post/${data.data.post.slug}`);
         },
     });
 
     const onSubmit = (postData) => {
-        if (imageFileUrl) postData.image = imageFileUrl;
         createPostMutation.mutate(postData);
     };
 
-    const handleUploadImage = () => {
+    const handleUploadImage = async () => {
         try {
             setImageUploadProgress(null);
             setImageUploadError(null);
@@ -60,33 +65,33 @@ const CreatePost = () => {
                     setImageUploadProgress(progress.toFixed(0));
                 },
                 (error) => {
-                    setImageUploadError("Couldn't upload image (File size must be < 2MB)");
-                    setImageUploadProgress(null);
-                    setCanUpload(false);
-                },
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then(
-                        (downloadUrl) => {
-                            setImageFileUrl(downloadUrl);
-                            setImageUploadProgress(null);
-                            setCanUpload(false);
-                        }
+                    setImageUploadError(
+                        "Couldn't upload image (File size must be < 2MB)"
                     );
+                    setImageUploadProgress(null);
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(
+                        uploadTask.snapshot.ref
+                    );
+                    setImageUploadProgress(null);
+                    setValue("image", downloadURL, { shouldDirty: true });
                 }
             );
-        } catch (err) {
+        } catch (error) {
             setImageUploadError("Image upload failed");
+            setImageUploadProgress(null);
         }
     };
 
     return (
         <div className="p-3 max-w-3xl mx-auto min-h-screen">
             <h1 className="text-center text-3xl my-7 font-semibold">
-                Create a Post
+                Update post
             </h1>
             <form
-                onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-col gap-4"
+                onSubmit={handleSubmit(onSubmit)}
             >
                 <div className="flex flex-col gap-4 sm:flex-row justify-between">
                     <TextInput
@@ -95,9 +100,7 @@ const CreatePost = () => {
                         placeholder="Title"
                         className="flex-1"
                         required
-                        {...register("title", {
-                            required: "This field is required",
-                        })}
+                        {...register("title")}
                     />
                     <Select id="categories" {...register("category")}>
                         <option value="uncategorized">Select a category</option>
@@ -106,18 +109,17 @@ const CreatePost = () => {
                         <option value="nextjs">NextJS</option>
                     </Select>
                 </div>
-                <div className="flex flex-col gap-4 border-4 border-dotted border-teal-500 p-4 text-">
+                <div className="flex flex-col gap-4 border-4 border-dotted border-teal-500 p-4">
                     <div className="flex gap-4 items-center justify-between">
                         <FileInput
                             id="file"
                             accept="image/*"
                             className="flex-1"
                             onChange={(e) => {
-                                setImageFile(e.target.files[0]);
-                                setCanUpload(
-                                    e.target.files[0] &&
-                                        imageFile !== e.target.files[0]
-                                );
+                                const file = e.target.files[0];
+                                if (file) {
+                                    setImageFile(file);
+                                }
                             }}
                         />
                         <Button
@@ -125,7 +127,7 @@ const CreatePost = () => {
                             gradientDuoTone="purpleToPink"
                             size="md"
                             outline
-                            disabled={!canUpload || imageUploadProgress}
+                            disabled={!imageFile || imageUploadProgress}
                             onClick={handleUploadImage}
                             className="flex-none w-32"
                         >
@@ -151,10 +153,10 @@ const CreatePost = () => {
                 {imageUploadError && (
                     <Alert color="failure">{imageUploadError}</Alert>
                 )}
-                {imageFileUrl && (
+                {getValues("image") && (
                     <img
-                        src={imageFileUrl}
-                        alt="Image"
+                        src={getValues("image")}
+                        alt="Post image"
                         className="w-full h-72 object-cover"
                     />
                 )}
@@ -162,18 +164,24 @@ const CreatePost = () => {
                     register={register}
                     setValue={setValue}
                 />
-                <Button type="submit" gradientDuoTone="purpleToPink">
-                    Publish
+                <Button
+                    type="submit"
+                    gradientDuoTone="purpleToPink"
+                    disabled={createPostMutation.isPending || !isDirty}
+                >
+                    {createPostMutation.isPending ? (
+                        <>
+                            <Spinner size="sm" />
+                            <span className="pl-3">Updating...</span>
+                        </>
+                    ) : (
+                        "Create Post"
+                    )}
                 </Button>
             </form>
             {createPostMutation.isError && (
                 <Alert className="mt-5" color="failure">
                     {createPostMutation.error.message}
-                </Alert>
-            )}
-            {createPostMutation.data && (
-                <Alert className="mt-5" color="success">
-                    {createPostMutation.data.message}
                 </Alert>
             )}
         </div>

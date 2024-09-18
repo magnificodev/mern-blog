@@ -19,24 +19,16 @@ import { updatePost, getPosts } from "../api/posts";
 
 const UpdatePost = () => {
     const { postId } = useParams();
-    const navigate = useNavigate();
     const [imageFile, setImageFile] = useState(null);
-    const [imageFileUrl, setImageFileUrl] = useState(null);
     const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
-    const [canUpload, setCanUpload] = useState(false);
+    const navigate = useNavigate();
 
-    const {
-        register,
-        setValue,
-        handleSubmit,
-        watch,
-        formState: { isDirty },
-    } = useForm();
+    const { register, setValue, getValues, handleSubmit, watch } = useForm();
 
-    const { data, isLoading } = useQuery({
+    const { data } = useQuery({
         queryKey: ["post", postId],
-        queryFn: () => getPosts({ postId: postId }),
+        queryFn: () => getPosts({ postId }),
     });
 
     const postData = data?.data.posts[0];
@@ -47,8 +39,6 @@ const UpdatePost = () => {
             setValue("content", postData.content);
             setValue("category", postData.category);
             setValue("image", postData.image);
-            setImageFileUrl(postData.image);
-            setCanUpload(false);
         }
     }, [postData, setValue]);
 
@@ -60,11 +50,10 @@ const UpdatePost = () => {
     });
 
     const onSubmit = (updatedPostData) => {
-        if (imageFileUrl) updatedPostData.image = imageFileUrl;
         updatePostMutation.mutate({ postId, postData: updatedPostData });
     };
 
-    const handleUploadImage = () => {
+    const handleUploadImage = async () => {
         try {
             setImageUploadProgress(null);
             setImageUploadError(null);
@@ -85,34 +74,27 @@ const UpdatePost = () => {
                         "Couldn't upload image (File size must be < 2MB)"
                     );
                     setImageUploadProgress(null);
-                    setCanUpload(false);
                 },
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then(
-                        (downloadURL) => {
-                            setImageUploadProgress(null);
-                            setImageFileUrl(downloadURL);
-                            setCanUpload(false);
-                        }
+                async () => {
+                    const downloadURL = await getDownloadURL(
+                        uploadTask.snapshot.ref
                     );
+                    setImageUploadProgress(null);
+                    setValue("image", downloadURL, { shouldDirty: true });
                 }
             );
         } catch (error) {
             setImageUploadError("Image upload failed");
             setImageUploadProgress(null);
-            setCanUpload(false);
         }
     };
 
-    if (isLoading) return <Spinner />;
-
     const watchedFields = watch();
-    const isFormModified = isDirty || imageFileUrl !== postData?.image;
     const isFormUnchanged =
         watchedFields.title === postData?.title &&
         watchedFields.content === postData?.content &&
         watchedFields.category === postData?.category &&
-        imageFileUrl === postData?.image;
+        watchedFields.image === postData?.image;
 
     return (
         <div className="p-3 max-w-3xl mx-auto min-h-screen">
@@ -139,21 +121,17 @@ const UpdatePost = () => {
                         <option value="nextjs">NextJS</option>
                     </Select>
                 </div>
-                <div className="flex flex-col gap-4 border-4 border-dotted border-teal-500 p-4 text-">
+                <div className="flex flex-col gap-4 border-4 border-dotted border-teal-500 p-4">
                     <div className="flex gap-4 items-center justify-between">
                         <FileInput
                             id="file"
                             accept="image/*"
                             className="flex-1"
                             onChange={(e) => {
-                                setImageFile(e.target.files[0]);
-                                setValue("image", e.target.files[0], {
-                                    shouldDirty: true,
-                                });
-                                setCanUpload(
-                                    e.target.files[0] &&
-                                        imageFile !== e.target.files[0]
-                                );
+                                const file = e.target.files[0];
+                                if (file) {
+                                    setImageFile(file);
+                                }
                             }}
                         />
                         <Button
@@ -161,7 +139,7 @@ const UpdatePost = () => {
                             gradientDuoTone="purpleToPink"
                             size="md"
                             outline
-                            disabled={!canUpload || imageUploadProgress}
+                            disabled={!imageFile || imageUploadProgress}
                             onClick={handleUploadImage}
                             className="flex-none w-32"
                         >
@@ -187,24 +165,24 @@ const UpdatePost = () => {
                 {imageUploadError && (
                     <Alert color="failure">{imageUploadError}</Alert>
                 )}
-                <img
-                    src={imageFileUrl || postData?.image}
-                    alt="Image"
-                    className="w-full h-72 object-cover"
-                />
-                <TextEditor
-                    register={register}
-                    setValue={setValue}
-                    initialValue={postData?.content}
-                />
+                {getValues("image") && (
+                    <img
+                        src={getValues("image")}
+                        alt="Post image"
+                        className="w-full h-72 object-cover"
+                    />
+                )}
+                {getValues("content") && (
+                    <TextEditor
+                        register={register}
+                        setValue={setValue}
+                        initialValue={getValues("content")}
+                    />
+                )}
                 <Button
                     type="submit"
                     gradientDuoTone="purpleToPink"
-                    disabled={
-                        updatePostMutation.isPending ||
-                        !isFormModified ||
-                        isFormUnchanged
-                    }
+                    disabled={updatePostMutation.isPending || isFormUnchanged}
                 >
                     {updatePostMutation.isPending ? (
                         <>

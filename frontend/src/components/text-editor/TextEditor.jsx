@@ -33,20 +33,20 @@ const extensions = [
     }),
 ];
 
-const content = "";
-
 const TextEditor = ({ register, setValue, initialValue = "" }) => {
     const editor = useEditor({
         extensions,
         content: initialValue,
         onUpdate: ({ editor }) => {
-            setValue("content", editor.getHTML(), { shouldDirty: true });
+            setValue("content", editor.isEmpty ? "" : editor.getHTML(), {
+                shouldDirty: true,
+            });
         },
     });
 
     useEffect(() => {
         register("content");
-    }, [content]);
+    }, []);
 
     return (
         <div className="border-2 border-teal-500 bg-white dark:bg-transparent text-[#0d0d0d] dark:text-teal-50 flex flex-col rounded-md">

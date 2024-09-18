@@ -1,6 +1,11 @@
 import { body } from "express-validator";
 
 export const createValidator = [
-    body("title").notEmpty().withMessage("All fields are required"),
-    body("content").notEmpty().withMessage("All fields are required"),
+    body("title").trim().notEmpty().withMessage("Title cannot be empty"),
+    body("content").trim().notEmpty().withMessage("Content cannot be empty"),
+];
+
+export const updateValidator = [
+    body("title").trim().notEmpty().withMessage("Title cannot be empty"),
+    body("content").trim().notEmpty().withMessage("Content cannot be empty"),
 ];

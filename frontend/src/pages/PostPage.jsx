@@ -6,6 +6,7 @@ import { getPosts } from "../api/posts";
 import { Link } from "react-router-dom";
 import { Button } from "flowbite-react";
 import { format } from "date-fns";
+import CallToAction from "../components/CallToAction";
 import "../styles/MainPostContent.scss";
 
 function PostPage() {
@@ -31,13 +32,13 @@ function PostPage() {
     if (isError) return <div>Something went wrong</div>;
 
     return (
-        <main className="flex flex-col justify-center items-center p-3 max-w-6xl mx-auto min-h-screen">
+        <main className="flex flex-col items-center p-3 max-w-6xl mx-auto min-h-screen">
             {postData ? (
                 <>
                     <h1 className="text-3xl mt-8 p-3 text-center font-sans font-medium max-w-2xl mx-auto lg:text-4xl">
                         {postData.title}
                     </h1>
-                    {postData.category !== "uncategorized" && (
+                    {postData.category !== "uncategorized" && postData.image && (
                         <Link
                             to={`/search?category=${postData.category}`}
                             className="mx-auto mt-5"
@@ -47,18 +48,22 @@ function PostPage() {
                             </Button>
                         </Link>
                     )}
-                    <img
-                        src={postData.image}
-                        alt={postData.title}
-                        className="mt-10 p-3 max-h-[600px] w-full object-cover"
-                    />
+                    {postData.image && (
+                        <img
+                            src={postData.image}
+                            alt={postData.title}
+                            className="mt-10 p-3 max-h-[600px] w-full object-cover"
+                        />
+                    )}
                     <div className="flex justify-between mx-auto w-full max-w-2xl text-xs border-b p-3 border-slate-500">
                         <span>{format(postData.createdAt, "dd/MM/yyyy")}</span>
                         <span className="italic">
                             {(() => {
-                                const wordCount = postData.content.trim().split(/\s+/).length;
+                                const wordCount = postData.content
+                                    .trim()
+                                    .split(/\s+/).length;
                                 const readingTime = Math.ceil(wordCount / 200);
-                                return readingTime > 1 
+                                return readingTime > 1
                                     ? `${readingTime} mins read`
                                     : "1 min read";
                             })()}
@@ -75,6 +80,9 @@ function PostPage() {
             ) : (
                 <p>Post not found</p>
             )}
+            <div className="max-w-4xl mx-auto w-full">
+                <CallToAction />
+            </div>
         </main>
     );
 }

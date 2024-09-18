@@ -48,7 +48,7 @@ app.use((err, req, res, next) => {
         message = Object.values(err.errors)[0].message;
         statusCode = 400;
     }
-
+console.log(message)
     res.status(statusCode).json({
         status,
         message,

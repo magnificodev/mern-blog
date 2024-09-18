@@ -1,26 +1,34 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { Table } from "flowbite-react";
+import { Table, Spinner, Modal, Button } from "flowbite-react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
-import { Spinner, Modal, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { getPosts, deletePost } from "../api/posts";
 
-const DashPosts = () => {
-    const [showModal, setShowModal] = useState(false);
-    const [postIdToDelete, setPostIdToDelete] = useState("");
-    const [userPosts, setUserPosts] = useState([]);
+function DashPosts() {
     const { currentUser } = useSelector((state) => state.user);
+    const [posts, setPosts] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [postIdToDelete, setPostIdToDelete] = useState(null);
+
+    const { data, fetchNextPage, hasNextPage, isLoading, isError } =
+        useInfiniteQuery({
+            queryKey: ["posts", currentUser._id],
+            queryFn: ({ pageParam = 1 }) =>
+                getPosts({ pageParam, userId: currentUser._id, limit: 5 }),
+            getNextPageParam: (lastPage, allPages) =>
+                lastPage.data.totalPages > allPages.length
+                    ? allPages.length + 1
+                    : undefined,
+        });
 
     const { mutate: deletePostMutate, isLoading: isDeleting } = useMutation({
         mutationFn: (postId) => deletePost(postId),
         onSuccess: () => {
             setShowModal(false);
-            setUserPosts(
-                userPosts.filter((post) => post._id !== postIdToDelete)
-            );
+            setPosts(posts.filter((post) => post._id !== postIdToDelete));
             setPostIdToDelete("");
         },
     });
@@ -29,22 +37,12 @@ const DashPosts = () => {
         deletePostMutate(postIdToDelete);
     };
 
-    const { data, fetchNextPage, hasNextPage, isLoading, isError } =
-        useInfiniteQuery({
-            queryKey: ["posts", currentUser._id],
-            queryFn: ({ pageParam }) =>
-                getPosts({ pageParam, userId: currentUser._id }),
-            initialPageParam: 1,
-            getNextPageParam: (lastPage, allPages) =>
-                lastPage.data.totalPages > allPages.length
-                    ? allPages.length + 1
-                    : undefined,
-        });
-
     useEffect(() => {
         if (data) {
-            const newPosts = data.pages.flatMap((page) => page.data.posts);
-            setUserPosts(newPosts);
+            const newPosts = data.pages
+                .slice(-1)
+                .flatMap((page) => page.data.posts);
+            setPosts((prev) => [...prev, ...newPosts]);
         }
     }, [data]);
 
@@ -58,7 +56,7 @@ const DashPosts = () => {
 
     return (
         <div className="flex-1 p-3 overflow-hidden">
-            {currentUser.isAdmin && userPosts.length > 0 ? (
+            {currentUser.isAdmin && posts.length > 0 ? (
                 <>
                     <div className="w-full table-auto overflow-x-auto md:mx-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 dark:scrollbar-track-slate-700 dark:scrollbar-thumb-slate-500 shadow-md">
                         <Table hoverable striped>
@@ -71,11 +69,11 @@ const DashPosts = () => {
                                 <Table.HeadCell>Edit</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
-                                {userPosts.map((post) => (
+                                {posts.map((post) => (
                                     <Table.Row key={post._id}>
                                         <Table.Cell>
                                             {format(
-                                                post.updatedAt,
+                                                new Date(post.updatedAt),
                                                 "dd/MM/yyyy"
                                             )}
                                         </Table.Cell>
@@ -183,6 +181,6 @@ const DashPosts = () => {
             )}
         </div>
     );
-};
+}
 
 export default DashPosts;

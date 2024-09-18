@@ -28,10 +28,10 @@ export const getPosts = async ({
     slug,
     postId,
     searchTerm,
-} = {}) => {
+}) => {
     try {
         const url = new URL("/api/posts", window.location.origin);
-
+        
         const params = {
             userId,
             skip: skip || (pageParam - 1) * limit,
@@ -42,7 +42,7 @@ export const getPosts = async ({
         };
 
         Object.keys(params).forEach((key) => {
-            if (params[key] !== undefined && params[key] !== null) {
+            if (!!params[key]) {
                 url.searchParams.append(key, params[key]);
             }
         });
