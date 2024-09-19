@@ -33,6 +33,7 @@ function CommentSection({ postId }) {
         mutationFn: createComment,
         onSuccess: () => {
             setComment("");
+            setRemainingCharacters(300);
             queryClient.invalidateQueries(["comments", postId]);
         },
     });
