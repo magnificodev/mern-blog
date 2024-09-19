@@ -1,16 +1,18 @@
 import { Button } from "flowbite-react";
-import { AiFillGoogleCircle } from "react-icons/ai";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../firebase/firebaseConfig";
-import { useMutation } from "@tanstack/react-query";
-import { googleAuth } from "../api/auth";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
+import { AiFillGoogleCircle } from "react-icons/ai";
+import { useMutation } from "@tanstack/react-query";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+import { useAppContext } from "../contexts/AppContext";
+import { googleAuth } from "../api/auth";
+import { auth } from "../firebase/firebaseConfig";
 import { signInSuccess } from "../redux/user/userSlice";
 
 const OAuth = () => {
-
+    const { showToast } = useAppContext();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -19,6 +21,10 @@ const OAuth = () => {
         onSuccess: (data) => {
             navigate("/");
             dispatch(signInSuccess(data.data.user))
+            showToast({
+                type: data.status,
+                message: data.message,
+            });
         },
     });
 
@@ -34,7 +40,10 @@ const OAuth = () => {
                 googlePhotoUrl: user.photoURL,
             });
         } catch (err) {
-            console.log(err);
+            showToast({
+                type: "error",
+                message: err.message,
+            });
         }
     };
 

@@ -1,5 +1,5 @@
-import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import bcryptjs from "bcryptjs";
 import { validationResult } from "express-validator";
 
 import User from "../models/user.model.js";
@@ -17,15 +17,13 @@ export const signUp = async (req, res, next) => {
 
         const hashedPassword = await bcryptjs.hash(password, 10);
 
-        const newUser = new User({
+        await User.create({
             username,
             email,
             password: hashedPassword,
         });
 
-        await newUser.save();
-
-        res.json({
+        res.status(201).json({
             status: "success",
             message: "Sign up successfully",
             data: {},
@@ -45,17 +43,13 @@ export const signIn = async (req, res, next) => {
 
         const { email, password } = req.body;
 
-        const existingUser = await User.findOne({
+        const user = await User.findOne({
             email,
         });
 
-        if (!existingUser) {
-            return next(new MyError(404, "Your account doesn't exist"));
-        } // 404 Bad Request
-
         const isPasswordMatched = await bcryptjs.compare(
             password,
-            existingUser.password
+            user.password
         );
 
         if (!isPasswordMatched) {
@@ -65,16 +59,16 @@ export const signIn = async (req, res, next) => {
         } // 401 Unauthorized
 
         const token = jwt.sign(
-            { userId: existingUser._id, isAdmin: existingUser.isAdmin },
+            { userId: user._id, isAdmin: user.isAdmin },
             process.env.JWT_SECRET_KEY
         );
 
-        const { password: pass, ...rest } = existingUser._doc;
+        const { password: pass, ...rest } = user._doc;
 
         res.status(200)
             .cookie("accessToken", token, {
                 httpOnly: true,
-                maxAge: 1 * 60 * 60 * 1000,
+                maxAge: 1 * 60 * 60 * 1000, // 1 hour
             })
             .json({
                 status: "success",
@@ -121,7 +115,8 @@ export const googleAuth = async (req, res, next) => {
                 Math.random().toString(36).slice(-8);
 
             const hashedPassword = await bcryptjs.hash(generatedPassword, 10);
-            const newUser = new User({
+
+            const newUser = await User.create({
                 username:
                     name.toLowerCase().split(" ").join("") +
                     Math.random().toString(9).slice(-4),
@@ -129,8 +124,6 @@ export const googleAuth = async (req, res, next) => {
                 password: hashedPassword,
                 profilePic: googlePhotoUrl,
             });
-
-            await newUser.save();
             const token = jwt.sign(
                 { userId: newUser._id, isAdmin: newUser.isAdmin },
                 process.env.JWT_SECRET_KEY

@@ -10,20 +10,26 @@ import {
 } from "../validation/FormValidation";
 import { signUp } from "../api/auth";
 import OAuth from "../components/OAuth";
+import { useAppContext } from "../contexts/AppContext";
 
 const SignUp = () => {
+    const { showToast } = useAppContext();
+    const navigate = useNavigate();
+
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm();
 
-    const navigate = useNavigate();
-
     const { mutate, error, isError, isPending } = useMutation({
         mutationFn: signUp,
         onSuccess: (data) => {
             navigate("/sign-in");
+            showToast({
+                type: data.status,
+                message: data.message,
+            });
         },
     });
 
@@ -42,12 +48,15 @@ const SignUp = () => {
                         Blog
                     </Link>
                     <p className="text-sm mt-5">
-                        This is a demo project. You can sign up with your email and password or with
-                        Google.
+                        This is a demo project. You can sign up with your email
+                        and password or with Google.
                     </p>
                 </div>
                 <div className="w-full">
-                    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+                    <form
+                        className="flex flex-col gap-4"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
                         <div>
                             <Label value="Your username" htmlFor="username" />
                             <TextInput
@@ -105,7 +114,11 @@ const SignUp = () => {
                                 }
                             />
                         </div>
-                        <Button gradientDuoTone="purpleToPink" type="submit" disabled={isPending}>
+                        <Button
+                            gradientDuoTone="purpleToPink"
+                            type="submit"
+                            disabled={isPending}
+                        >
                             {isPending ? (
                                 <>
                                     <Spinner size="sm" />

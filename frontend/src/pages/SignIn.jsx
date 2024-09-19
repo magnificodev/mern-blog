@@ -1,27 +1,38 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Label, TextInput, Button, Spinner, Alert } from "flowbite-react";
-import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 
-import { emailValidationObj, passwordValidationObj } from "../validation/FormValidation";
+import { useMutation } from "@tanstack/react-query";
+
 import { signIn } from "../api/auth";
 import OAuth from "../components/OAuth";
 import { signInSuccess } from "../redux/user/userSlice";
+import {
+    emailValidationObj,
+    passwordValidationObj,
+} from "../validation/FormValidation";
+import { useAppContext } from "../contexts/AppContext";
 
 const SignIn = () => {
+    const { showToast } = useAppContext();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const { mutate, error, isError, isPending } = useMutation({
         mutationFn: signIn,
         onSuccess: (data) => {
             dispatch(signInSuccess(data.data.user));
+            showToast({
+                type: data.status,
+                message: data.message,
+            });
             navigate("/");
         },
     });
@@ -29,6 +40,7 @@ const SignIn = () => {
     const onSubmit = (userData) => {
         mutate(userData);
     };
+
     return (
         <div className="min-h-screen mt-20">
             <div className="flex flex-col p-3 max-w-3xl mx-auto items-center md:flex-row gap-5 md:gap-8">
@@ -40,12 +52,15 @@ const SignIn = () => {
                         Blog
                     </Link>
                     <p className="text-sm mt-5">
-                        This is a demo project. You can sign in with your email and password or with
-                        Google.
+                        This is a demo project. You can sign in with your email
+                        and password or with Google.
                     </p>
                 </div>
                 <div className="w-full">
-                    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+                    <form
+                        className="flex flex-col gap-4"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
                         <div>
                             <Label value="Your email" htmlFor="email" />
                             <TextInput
@@ -84,7 +99,11 @@ const SignIn = () => {
                                 }
                             />
                         </div>
-                        <Button gradientDuoTone="purpleToPink" type="submit" disabled={isPending}>
+                        <Button
+                            gradientDuoTone="purpleToPink"
+                            type="submit"
+                            disabled={isPending}
+                        >
                             {isPending ? (
                                 <>
                                     <Spinner size="sm" />

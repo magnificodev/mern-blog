@@ -1,6 +1,11 @@
 import express from "express";
 
-import { signUp, signIn, googleAuth, signOut } from "../controllers/auth.controller.js";
+import {
+    signUp,
+    signIn,
+    googleAuth,
+    signOut,
+} from "../controllers/auth.controller.js";
 import {
     signUpValidator,
     signInValidator,

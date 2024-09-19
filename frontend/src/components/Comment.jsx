@@ -13,6 +13,7 @@ function Comment({ comment }) {
     const { currentUser } = useSelector((state) => state.user);
     const [user, setUser] = useState(null);
     const [likes, setLikes] = useState(comment.likes);
+    const [numberOfLikes, setNumberOfLikes] = useState(comment.numberOfLikes);
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editedContent, setEditedContent] = useState(comment.content);
@@ -28,6 +29,7 @@ function Comment({ comment }) {
             likeComment({ commentId, userId }),
         onSuccess: (data) => {
             setLikes(data.data.comment.likes);
+            setNumberOfLikes(data.data.comment.numberOfLikes);
             queryClient.invalidateQueries({
                 queryKey: ["comments", comment.postId],
             });
@@ -143,11 +145,11 @@ function Comment({ comment }) {
                             >
                                 <FaThumbsUp className="w-4 h-4" />
                             </button>
-                            {likes.length > 0 && (
+                            {numberOfLikes > 0 && (
                                 <p>
-                                    {likes.length > 1
-                                        ? `${likes.length} likes`
-                                        : `${likes.length} like`}
+                                    {numberOfLikes > 1
+                                        ? `${numberOfLikes} likes`
+                                        : `${numberOfLikes} like`}
                                 </p>
                             )}
                             {(currentUser._id === user?._id ||

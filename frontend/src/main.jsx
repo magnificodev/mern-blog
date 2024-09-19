@@ -9,6 +9,7 @@ import { store, persistor } from "./redux/store.js";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import ThemeProvider from "./components/ThemeProvider.jsx";
+import { AppContextProvider } from "./contexts/AppContext.jsx";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -24,10 +25,12 @@ createRoot(document.getElementById("root")).render(
             <PersistGate persistor={persistor}>
                 <Provider store={store}>
                     <ThemeProvider>
-                        <Router>
-                            <ScrollToTop />
-                            <AppRoutes />
-                        </Router>
+                        <AppContextProvider>
+                            <Router>
+                                <ScrollToTop />
+                                <AppRoutes />
+                            </Router>
+                        </AppContextProvider>
                     </ThemeProvider>
                 </Provider>
             </PersistGate>

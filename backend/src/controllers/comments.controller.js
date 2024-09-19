@@ -61,6 +61,8 @@ export const likeComment = async (req, res, next) => {
             comment.likes.push(userId);
         }
 
+        comment.numberOfLikes = comment.likes.length;
+
         await comment.save();
 
         res.status(200).json({
