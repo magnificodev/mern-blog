@@ -30,6 +30,26 @@ export const getUsers = async (req, res, next) => {
     }
 };
 
+export const getUser = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.userId);
+
+        if (!user) {
+            return next(new MyError(404, "User not found"));
+        }
+
+        const { password, ...rest } = user._doc;
+        
+        res.status(200).json({
+            status: "success",
+            message: "User fetched successfully",
+            data: { user: rest },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const updateUser = async (req, res, next) => {
     try {
         if (req.userId !== req.params.userId)

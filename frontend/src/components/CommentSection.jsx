@@ -1,33 +1,64 @@
 import { Textarea, Button } from "flowbite-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { createComment } from "../api/comments";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createComment, getPostComments } from "../api/comments";
 import { Spinner, Alert } from "flowbite-react";
+import Comment from "./Comment";
 
 function CommentSection({ postId }) {
     const { currentUser } = useSelector((state) => state.user);
     const [remainingCharacters, setRemainingCharacters] = useState(300);
     const [comment, setComment] = useState("");
+    const queryClient = useQueryClient();
 
-    const { mutate, isPending, isError, error } = useMutation({
+    const {
+        data,
+        isLoading,
+        isError: isQueryError,
+        error: queryError,
+    } = useQuery({
+        queryKey: ["comments", postId],
+        queryFn: () => getPostComments(postId),
+        refetchInterval: 3000, // Refetch every 3 seconds
+    });
+
+    const {
+        mutate,
+        isPending,
+        isError: isMutationError,
+        error: mutationError,
+    } = useMutation({
         mutationFn: createComment,
         onSuccess: () => {
             setComment("");
+            queryClient.invalidateQueries(["comments", postId]);
         },
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        mutate({ comment, postId, userId: currentUser._id });
+        if (currentUser && comment.trim()) {
+            mutate({ content: comment, postId, userId: currentUser._id });
+        }
     };
+
+    if (isLoading) return <Spinner />;
+    if (isQueryError)
+        return (
+            <Alert color="failure">
+                Error loading comments: {queryError.message}
+            </Alert>
+        );
+
+    const comments = data?.data.comments || [];
 
     return (
         <div className="max-w-2xl mx-auto w-full">
             {currentUser ? (
                 <div className="flex items-center gap-1 my-5 text-gray-500 text-sm">
-                    <p>Sign in as:</p>
+                    <p>Signed in as:</p>
                     <img
                         className="w-5 h-5 rounded-full object-cover"
                         src={currentUser.profilePic}
@@ -77,7 +108,7 @@ function CommentSection({ postId }) {
                             type="submit"
                             gradientDuoTone="purpleToBlue"
                             outline
-                            disabled={!comment || isPending}
+                            disabled={!comment.trim() || isPending}
                         >
                             {isPending ? (
                                 <>
@@ -89,9 +120,28 @@ function CommentSection({ postId }) {
                             )}
                         </Button>
                     </div>
+                    {isMutationError && (
+                        <Alert color="failure">
+                            Error submitting comment: {mutationError.message}
+                        </Alert>
+                    )}
                 </form>
             )}
-            {isError && <Alert color="failure">Error: {error.message}</Alert>}
+            {comments.length > 0 ? (
+                <>
+                    <div className="text-sm my-5 flex items-center gap-1">
+                        <p>Comments</p>
+                        <div className="border border-gray-400 py-1 px-3 rounded-sm">
+                            <p>{comments.length}</p>
+                        </div>
+                    </div>
+                    {comments.map((comment) => (
+                        <Comment key={comment._id} comment={comment} />
+                    ))}
+                </>
+            ) : (
+                <p className="text-sm my-5">No comments yet!</p>
+            )}
         </div>
     );
 }

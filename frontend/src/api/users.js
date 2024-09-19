@@ -23,6 +23,20 @@ export const getUsers = async ({ pageParam = 1, limit = 5 } = {}) => {
     }
 };
 
+export const getUser = async ({ userId }) => {
+    try {
+        const response = await fetch(`/api/users/${userId}`);
+        const responseBody = await response.json();
+
+        if (responseBody.status === "failure") {
+            throw new Error(responseBody.message);
+        }
+
+        return responseBody;
+    } catch (err) {
+        throw new Error(err.message);
+    }
+};
 export const updateUser = async (userData) => {
     try {
         console.log(userData);
