@@ -39,7 +39,7 @@ export const getUser = async (req, res, next) => {
         }
 
         const { password, ...rest } = user._doc;
-        
+
         res.status(200).json({
             status: "success",
             message: "User fetched successfully",
@@ -52,40 +52,44 @@ export const getUser = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
     try {
-        if (req.userId !== req.params.userId)
+        if (req.userId !== req.params.userId) {
             return next(
                 new MyError(403, "You are not allowed to update this user")
             );
+        }
 
         const errors = validationResult(req);
-
         if (!errors.isEmpty()) {
             return next(new MyError(400, errors.errors[0].msg));
-        } // 400 Bad Request
+        }
 
-        const { username, password, profilePic } = req.body;
+        if (!req.body) {
+            return next(new MyError(400, "No data to update"));
+        }
 
-        const hashedPassword = await brcyptjs.hash(password, 10);
+        if (req.body.password) {
+            req.body.password = await brcyptjs.hash(req.body.password, 10);
+        }
+
+        const { email, ...rest } = req.body;
 
         const updatedUser = await User.findByIdAndUpdate(
             req.params.userId,
-            {
-                $set: {
-                    username,
-                    password: hashedPassword,
-                    profilePic,
-                },
-            },
+            { $set: rest },
             { new: true }
         );
 
-        const { password: pass, ...rest } = updatedUser._doc;
+        if (!updatedUser) {
+            return next(new MyError(404, "User not found"));
+        }
+
+        const { password: _, ...userWithoutPassword } = updatedUser._doc;
 
         res.status(200).json({
             status: "success",
-            message: "User has been updated!",
+            message: "User has been updated successfully",
             data: {
-                user: rest,
+                user: userWithoutPassword,
             },
         });
     } catch (err) {

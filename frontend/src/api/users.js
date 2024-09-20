@@ -1,6 +1,6 @@
 export const getUsers = async ({ pageParam = 1, limit = 5 } = {}) => {
     try {
-        const url = new URL("/api/users", window.location.origin);
+        const url = new URL("/api/v1/users", window.location.origin);
         if (pageParam !== undefined && limit !== null) {
             url.searchParams.append("skip", (pageParam - 1) * limit);
         }
@@ -25,7 +25,7 @@ export const getUsers = async ({ pageParam = 1, limit = 5 } = {}) => {
 
 export const getUser = async ({ userId }) => {
     try {
-        const response = await fetch(`/api/users/${userId}`);
+        const response = await fetch(`/api/v1/users/${userId}`);
         const responseBody = await response.json();
 
         if (responseBody.status === "failure") {
@@ -37,11 +37,11 @@ export const getUser = async ({ userId }) => {
         throw new Error(err.message);
     }
 };
-export const updateUser = async (userData) => {
+
+export const updateUser = async ({ userId, userData }) => {
     try {
-        console.log(userData);
-        const response = await fetch(`/api/users/${userData.userId}`, {
-            method: "PUT",
+        const response = await fetch(`/api/v1/users/${userId}`, {
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -62,7 +62,7 @@ export const updateUser = async (userData) => {
 
 export const deleteUser = async (userId) => {
     try {
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/v1/users/${userId}`, {
             method: "DELETE",
         });
 

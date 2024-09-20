@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 
 export const signUpValidator = [
     body("username")
+        .trim()
         .notEmpty()
         .withMessage("All fields are required")
         .isLength({ min: 4 })
@@ -18,6 +19,7 @@ export const signUpValidator = [
             }
         }),
     body("email")
+        .trim()
         .notEmpty()
         .withMessage("All fields are required")
         .isEmail()
@@ -29,6 +31,7 @@ export const signUpValidator = [
             }
         }),
     body("password")
+        .trim()
         .notEmpty()
         .withMessage("All fields are required")
         .isLength({ min: 6 })
@@ -37,6 +40,7 @@ export const signUpValidator = [
 
 export const signInValidator = [
     body("email")
+        .trim()
         .notEmpty()
         .withMessage("All fields are required")
         .isEmail()
@@ -48,6 +52,7 @@ export const signInValidator = [
             }
         }),
     body("password")
+        .trim()
         .notEmpty()
         .withMessage("All fields are required")
         .isLength({ min: 6 })
