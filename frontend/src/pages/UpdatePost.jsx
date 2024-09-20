@@ -1,37 +1,44 @@
-import "../styles/text-editor/TextEditor.scss";
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-    TextInput,
-    Select,
-    FileInput,
-    Button,
-    Spinner,
-    Progress,
-    Alert,
-} from "flowbite-react";
-import TextEditor from "../components/text-editor/TextEditor";
-import { storage } from "../firebase/firebaseConfig";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { useEffect, useState } from "react";
+
 import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    Alert,
+    Button,
+    FileInput,
+    Progress,
+    Select,
+    Spinner,
+    TextInput,
+} from "flowbite-react";
+
+import { useQueryClient } from "@tanstack/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { updatePost, getPosts } from "../api/posts";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+
+import { getPost, updatePost } from "../api/posts";
+import { storage } from "../firebase/firebaseConfig";
+import TextEditor from "../components/text-editor/TextEditor";
+
+import "../styles/text-editor/TextEditor.scss";
+import { useAppContext } from "../contexts/AppContext";
 
 const UpdatePost = () => {
     const { postId } = useParams();
     const [imageFile, setImageFile] = useState(null);
     const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
+    const queryClient = useQueryClient();
+    const { showToast } = useAppContext();
     const navigate = useNavigate();
-
     const { register, setValue, getValues, handleSubmit, watch } = useForm();
 
-    const { data } = useQuery({
+    const { data, isLoading, isError } = useQuery({
         queryKey: ["post", postId],
-        queryFn: () => getPosts({ postId }),
+        queryFn: () => getPost(postId),
     });
 
-    const postData = data?.data.posts[0];
+    const postData = data?.data.post;
 
     useEffect(() => {
         if (postData) {
@@ -46,7 +53,9 @@ const UpdatePost = () => {
         mutationFn: updatePost,
         onSuccess: (data) => {
             navigate(`/post/${data.data.post.slug}`);
-        },
+            queryClient.invalidateQueries({ queryKey: ["post", postId] });
+            showToast({ type: data.status, message: data.message });
+        }
     });
 
     const onSubmit = (updatedPostData) => {
@@ -80,6 +89,7 @@ const UpdatePost = () => {
                         uploadTask.snapshot.ref
                     );
                     setImageUploadProgress(null);
+                    setImageFile(null);
                     setValue("image", downloadURL, { shouldDirty: true });
                 }
             );
@@ -95,6 +105,14 @@ const UpdatePost = () => {
         watchedFields.content === postData?.content &&
         watchedFields.category === postData?.category &&
         watchedFields.image === postData?.image;
+
+    if (isLoading)
+        return (
+            <div className="flex items-center mx-auto">
+                <Spinner size="xl" />
+            </div>
+        );
+    if (isError) return <p>There is something wrong</p>;
 
     return (
         <div className="p-3 max-w-3xl mx-auto min-h-screen">

@@ -30,10 +30,7 @@ const SignUp = () => {
                 type: data.status,
                 message: data.message,
             });
-        },
-        onError: (err) => {
-            showToast({ type: "failure", message: err.message });
-        },
+        }
     });
 
     const onSubmit = (userData) => {

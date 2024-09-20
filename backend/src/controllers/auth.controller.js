@@ -16,8 +16,8 @@ export const signUp = async (req, res, next) => {
         const { username, email, password } = req.body;
 
         const hashedPassword = await bcryptjs.hash(password, 10);
-
-        await User.create({
+        
+        const newUser = await User.create({
             username,
             email,
             password: hashedPassword,
@@ -124,6 +124,7 @@ export const googleAuth = async (req, res, next) => {
                 password: hashedPassword,
                 profilePic: googlePhotoUrl,
             });
+
             const token = jwt.sign(
                 { userId: newUser._id, isAdmin: newUser.isAdmin },
                 process.env.JWT_SECRET_KEY

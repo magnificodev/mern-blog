@@ -3,46 +3,6 @@ import Post from "../models/post.model.js";
 import { validationResult } from "express-validator";
 import slugify from "slugify";
 
-export const createPost = async (req, res, next) => {
-    try {
-        if (!req.isAdmin) {
-            return next(
-                new MyError(403, "You are not allowed to create a post")
-            );
-        }
-
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-            return next(new MyError(400, errors.errors[0].msg));
-        } // 400 Bad Request
-
-        const slug = slugify(req.body.title, {
-            lower: true,
-            strict: true,
-            locale: "vi",
-        });
-
-        const newPost = new Post({
-            ...req.body,
-            slug,
-            userId: req.userId,
-        });
-
-        await newPost.save();
-
-        res.status(201).json({
-            status: "success",
-            message: "You post has been published!",
-            data: {
-                post: newPost._doc,
-            },
-        });
-    } catch (err) {
-        next(err);
-    }
-};
-
 export const getPosts = async (req, res, next) => {
     try {
         const skip = parseInt(req.query.skip) || 0;
@@ -53,7 +13,6 @@ export const getPosts = async (req, res, next) => {
             ...(req.query.userId && { userId: req.query.userId }),
             ...(req.query.category && { category: req.query.category }),
             ...(req.query.slug && { slug: req.query.slug }),
-            ...(req.query.postId && { _id: req.query.postId }),
             ...(req.query.searchTerm && {
                 $or: [
                     { title: { $regex: req.query.searchTerm, $options: "i" } },
@@ -75,7 +34,6 @@ export const getPosts = async (req, res, next) => {
         }
 
         const totalPosts = await Post.countDocuments();
-        const totalPages = Math.ceil(totalPosts / limit);
 
         const now = new Date();
 
@@ -95,8 +53,65 @@ export const getPosts = async (req, res, next) => {
             data: {
                 posts,
                 totalPosts,
-                totalPages,
                 lastMonthPosts,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getPost = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.postId);
+
+        if (!post) {
+            return next(new MyError(404, "Post not found"));
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Get the post successfully!",
+            data: {
+                post,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const createPost = async (req, res, next) => {
+    try {
+        if (!req.isAdmin) {
+            return next(
+                new MyError(403, "You are not allowed to create a post")
+            );
+        }
+
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return next(new MyError(400, errors.errors[0].msg));
+        } // 400 Bad Request
+
+        const slug = slugify(req.body.title, {
+            lower: true,
+            strict: true,
+            locale: "vi",
+        });
+
+        const newPost = await Post.create({
+            ...req.body,
+            slug,
+            userId: req.userId,
+        });
+
+        res.status(201).json({
+            status: "success",
+            message: "Your post has been published!",
+            data: {
+                post: newPost._doc,
             },
         });
     } catch (err) {
@@ -106,6 +121,7 @@ export const getPosts = async (req, res, next) => {
 
 export const updatePost = async (req, res, next) => {
     try {
+        console.log(req.body);
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {

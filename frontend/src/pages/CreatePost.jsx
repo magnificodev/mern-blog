@@ -15,11 +15,13 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { createPost } from "../api/posts";
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../contexts/AppContext";
 
 const CreatePost = () => {
     const [imageFile, setImageFile] = useState(null);
     const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
+    const { showToast } = useAppContext();
 
     const {
         register,
@@ -41,7 +43,8 @@ const CreatePost = () => {
         mutationFn: createPost,
         onSuccess: (data) => {
             navigate(`/post/${data.data.post.slug}`);
-        },
+            showToast({ type: data.status, message: data.message });
+        }
     });
 
     const onSubmit = (postData) => {
@@ -87,7 +90,7 @@ const CreatePost = () => {
     return (
         <div className="p-3 max-w-3xl mx-auto min-h-screen">
             <h1 className="text-center text-3xl my-7 font-semibold">
-                Update post
+                Create a post
             </h1>
             <form
                 className="flex flex-col gap-4"

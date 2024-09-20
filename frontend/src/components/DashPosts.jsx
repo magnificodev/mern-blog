@@ -1,50 +1,60 @@
-import { useEffect, useState } from "react";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+    useInfiniteQuery,
+    useQueryClient,
+    useMutation,
+} from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { Table, Spinner, Modal, Button } from "flowbite-react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { getPosts, deletePost } from "../api/posts";
+import { useAppContext } from "../contexts/AppContext";
 
 function DashPosts() {
     const { currentUser } = useSelector((state) => state.user);
-    const [posts, setPosts] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [postIdToDelete, setPostIdToDelete] = useState(null);
+    const { showToast } = useAppContext();
+    const queryClient = useQueryClient();
 
-    const { data, fetchNextPage, hasNextPage, isLoading, isError } =
-        useInfiniteQuery({
-            queryKey: ["posts", currentUser._id],
-            queryFn: ({ pageParam = 1 }) =>
-                getPosts({ pageParam, userId: currentUser._id, limit: 5 }),
-            getNextPageParam: (lastPage, allPages) =>
-                lastPage.data.totalPages > allPages.length
-                    ? allPages.length + 1
-                    : undefined,
-        });
-
-    const { mutate: deletePostMutate, isLoading: isDeleting } = useMutation({
-        mutationFn: (postId) => deletePost(postId),
-        onSuccess: () => {
-            setShowModal(false);
-            setPosts(posts.filter((post) => post._id !== postIdToDelete));
-            setPostIdToDelete("");
+    const {
+        data,
+        isLoading,
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ["posts"],
+        queryFn: ({ pageParam }) => getPosts({ skip: (pageParam - 1) * 5 }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, pages) => {
+            if (
+                lastPage.data.posts.length < 5 ||
+                (lastPage.data.posts.length === 5 &&
+                    pages.length * 5 === lastPage.data.totalPosts)
+            ) {
+                return undefined;
+            }
+            return pages.length + 1;
         },
     });
 
-    const handleDeletePost = () => {
-        deletePostMutate(postIdToDelete);
-    };
+    const posts = data?.pages.flatMap((page) => page.data.posts) || [];
 
-    useEffect(() => {
-        if (data) {
-            const newPosts = data.pages
-                .slice(-1)
-                .flatMap((page) => page.data.posts);
-            setPosts((prev) => [...prev, ...newPosts]);
-        }
-    }, [data]);
+    const { mutate: deletePostMutate, isPending: isDeleting } = useMutation({
+        mutationFn: deletePost,
+        onSuccess: (data) => {
+            showToast({ type: data.status, message: data.message });
+            queryClient.invalidateQueries(["posts"]);
+            setShowModal(false);
+        },
+        onError: (err) => {
+            showToast({ type: "failure", message: err.message });
+        },
+    });
 
     if (isLoading)
         return (
@@ -128,57 +138,58 @@ function DashPosts() {
                     {hasNextPage && (
                         <button
                             onClick={() => fetchNextPage()}
+                            disabled={isFetchingNextPage}
                             className="w-full text-teal-500 self-center text-sm py-4 hover:underline"
                         >
-                            Show more
+                            {isFetchingNextPage
+                                ? "Loading more..."
+                                : "Show more"}
                         </button>
                     )}
                 </>
             ) : (
                 <p>You have no posts yet</p>
             )}
-            {showModal && (
-                <Modal
-                    show={showModal}
-                    onClose={() => setShowModal(false)}
-                    popup
-                    size="md"
-                >
-                    <Modal.Header />
-                    <Modal.Body>
-                        <div className="text-center">
-                            <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
-                            <h3 className="mb-5 text-lg text-gray-500 dark:text-gray-400">
-                                Are you sure you want to delete this post?
-                            </h3>
-                            <div className="flex justify-center gap-4">
-                                <Button
-                                    color="failure"
-                                    onClick={handleDeletePost}
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting ? (
-                                        <>
-                                            <Spinner size="sm" />
-                                            <span className="ml-2">
-                                                Deleting...
-                                            </span>
-                                        </>
-                                    ) : (
-                                        "Yes, I'm sure"
-                                    )}
-                                </Button>
-                                <Button
-                                    color="gray"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    No, cancel
-                                </Button>
-                            </div>
+            <Modal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                popup
+                size="md"
+            >
+                <Modal.Header />
+                <Modal.Body>
+                    <div className="text-center">
+                        <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
+                        <h3 className="mb-5 text-lg text-gray-500 dark:text-gray-400">
+                            Are you sure you want to delete this post?
+                        </h3>
+                        <div className="flex justify-center gap-4">
+                            <Button
+                                color="failure"
+                                onClick={() => deletePostMutate(postIdToDelete)}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <Spinner size="sm" />
+                                        <span className="ml-2">
+                                            Deleting...
+                                        </span>
+                                    </>
+                                ) : (
+                                    "Yes, I'm sure"
+                                )}
+                            </Button>
+                            <Button
+                                color="gray"
+                                onClick={() => setShowModal(false)}
+                            >
+                                No, cancel
+                            </Button>
                         </div>
-                    </Modal.Body>
-                </Modal>
-            )}
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }

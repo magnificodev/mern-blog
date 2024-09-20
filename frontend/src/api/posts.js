@@ -1,6 +1,6 @@
 export const createPost = async (postData) => {
     try {
-        const response = await fetch("/api/posts", {
+        const response = await fetch("/api/v1/posts", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -21,21 +21,22 @@ export const createPost = async (postData) => {
 };
 
 export const getPosts = async ({
-    pageParam,
     userId,
     skip,
     limit,
+    order,
     slug,
     postId,
     searchTerm,
-}) => {
+} = {}) => {
     try {
-        const url = new URL("/api/posts", window.location.origin);
-        
+        const url = new URL("/api/v1/posts", window.location.origin);
+
         const params = {
             userId,
-            skip: skip || (pageParam - 1) * limit,
+            skip,
             limit,
+            order,
             slug,
             postId,
             searchTerm,
@@ -60,9 +61,25 @@ export const getPosts = async ({
     }
 };
 
+export const getPost = async (postId) => {
+    try {
+        const response = await fetch(`/api/v1/posts/${postId}`);
+
+        const responseBody = await response.json();
+
+        if (responseBody.status === "failure") {
+            throw new Error(responseBody.message);
+        }
+
+        return responseBody;
+    } catch (err) {
+        throw new Error(err.message);
+    }
+};
+
 export const updatePost = async ({ postId, postData }) => {
     try {
-        const response = await fetch(`/api/posts/${postId}`, {
+        const response = await fetch(`/api/v1/posts/${postId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -83,8 +100,9 @@ export const updatePost = async ({ postId, postData }) => {
 };
 
 export const deletePost = async (postId) => {
+    console.log("postId", postId);
     try {
-        const response = await fetch(`/api/posts/${postId}`, {
+        const response = await fetch(`/api/v1/posts/${postId}`, {
             method: "DELETE",
         });
 

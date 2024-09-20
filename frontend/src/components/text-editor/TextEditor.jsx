@@ -38,7 +38,7 @@ const TextEditor = ({ register, setValue, initialValue = "" }) => {
         extensions,
         content: initialValue,
         onUpdate: ({ editor }) => {
-            setValue("content", editor.isEmpty ? "" : editor.getHTML(), {
+            setValue("content", editor.getHTML(), {
                 shouldDirty: true,
             });
         },

@@ -34,10 +34,7 @@ const SignIn = () => {
                 message: data.message,
             });
             navigate("/");
-        },
-        onError: (err) => {
-            showToast({ type: "failure", message: err.message });
-        },
+        }
     });
 
     const onSubmit = (userData) => {

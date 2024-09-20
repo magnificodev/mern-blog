@@ -18,12 +18,11 @@ export const getUsers = async (req, res, next) => {
             .sort({ createdAt: order });
 
         const totalUsers = await User.countDocuments();
-        const totalPages = Math.ceil(totalUsers / limit);
 
         res.status(200).json({
             status: "success",
             message: "Users fetched successfully",
-            data: { users, totalPages },
+            data: { users, totalUsers },
         });
     } catch (err) {
         next(err);
@@ -105,6 +104,7 @@ export const deleteUser = async (req, res, next) => {
             );
 
         const deletedUser = await User.findById(req.params.userId);
+        
         if (deletedUser.isAdmin) {
             return next(
                 new MyError(403, "You are not allowed to delete an admin user")

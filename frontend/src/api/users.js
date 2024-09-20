@@ -1,12 +1,14 @@
-export const getUsers = async ({ pageParam = 1, limit = 5 } = {}) => {
+export const getUsers = async ({ skip, limit, order } = {}) => {
     try {
         const url = new URL("/api/v1/users", window.location.origin);
-        if (pageParam !== undefined && limit !== null) {
-            url.searchParams.append("skip", (pageParam - 1) * limit);
-        }
-        if (limit !== null) {
-            url.searchParams.append("limit", limit);
-        }
+
+        const params = { skip, limit, order };
+
+        Object.keys(params).forEach((key) => {
+            if (!!params[key]) {
+                url.searchParams.append(key, params[key]);
+            }
+        });
 
         const response = await fetch(url);
 
@@ -18,8 +20,7 @@ export const getUsers = async ({ pageParam = 1, limit = 5 } = {}) => {
 
         return responseBody;
     } catch (err) {
-        console.error("Error fetching users:", err);
-        throw new Error("Failed to fetch users. Please try again later.");
+        throw new Error(err.message);
     }
 };
 
