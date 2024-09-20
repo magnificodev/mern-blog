@@ -121,7 +121,6 @@ export const createPost = async (req, res, next) => {
 
 export const updatePost = async (req, res, next) => {
     try {
-        console.log(req.body);
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {

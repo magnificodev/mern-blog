@@ -8,9 +8,10 @@ import { useMutation } from "@tanstack/react-query";
 import { toggleTheme } from "../redux/theme/themeSlice";
 import { signOut } from "../api/auth";
 import { signOutSuccess } from "../redux/user/userSlice";
-
+import { useAppContext } from "../contexts/AppContext";
 const Header = () => {
     const path = useLocation().pathname;
+    const { showToast } = useAppContext();
 
     const { currentUser } = useSelector((state) => state.user);
     const isSignedIn = currentUser !== null;
@@ -23,9 +24,13 @@ const Header = () => {
 
     const mutationSignOut = useMutation({
         mutationFn: signOut,
-        onSuccess: () => {
+        onSuccess: (data) => {
             dispatch(signOutSuccess());
             navigate("/");
+            showToast({ type: data.status, message: data.message });
+        },
+        onError: (err) => {
+            showToast({ type: "failure", message: err.message });
         },
     });
 

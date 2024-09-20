@@ -90,7 +90,7 @@ function DashUsers() {
                                             <img
                                                 src={user.profilePic}
                                                 alt={user.username}
-                                                className="w-10 h-10 rounded-full"
+                                                className="w-10 h-10 object-cover rounded-full"
                                             />
                                         </Table.Cell>
                                         <Table.Cell>
@@ -152,7 +152,7 @@ function DashUsers() {
                     <div className="text-center">
                         <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
                         <h3 className="mb-5 text-lg text-gray-500 dark:text-gray-400">
-                            Are you sure you want to delete this post?
+                            Are you sure you want to delete this user?
                         </h3>
                         <div className="flex justify-center gap-4">
                             <Button

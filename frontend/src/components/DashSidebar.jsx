@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Sidebar } from "flowbite-react";
+import { useMutation } from "@tanstack/react-query";
+import { signOut } from "../api/auth";
+import { signOutSuccess } from "../redux/user/userSlice";
+import { useAppContext } from "../contexts/AppContext";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
     HiUser,
     HiArrowSmRight,
@@ -14,8 +20,23 @@ import { useSelector } from "react-redux";
 const DashSidebar = () => {
     const location = useLocation();
     const [tab, setTab] = useState("");
+    const { showToast } = useAppContext();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { currentUser } = useSelector((state) => state.user);
+
+    const mutationSignOut = useMutation({
+        mutationFn: signOut,
+        onSuccess: (data) => {
+            dispatch(signOutSuccess());
+            navigate("/");
+            showToast({ type: data.status, message: data.message });
+        },
+        onError: (err) => {
+            showToast({ type: "failure", message: err.message });
+        },
+    });
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
@@ -78,7 +99,11 @@ const DashSidebar = () => {
                             Posts
                         </Sidebar.Item>
                     )}
-                    <Sidebar.Item href="#" icon={HiArrowSmRight}>
+                    <Sidebar.Item
+                        href="#"
+                        icon={HiArrowSmRight}
+                        onClick={() => mutationSignOut.mutate()}
+                    >
                         Sign out
                     </Sidebar.Item>
                 </Sidebar.ItemGroup>

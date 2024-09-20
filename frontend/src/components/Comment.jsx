@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import moment from "moment";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Button, Spinner } from "flowbite-react";
 import { Modal, Textarea } from "flowbite-react";
 
@@ -21,7 +22,8 @@ function Comment({ comment }) {
     const [isEdit, setIsEdit] = useState(false);
     const [editedContent, setEditedContent] = useState(comment.content);
     const queryClient = useQueryClient();
-
+    const navigate = useNavigate();
+    
     const { data } = useQuery({
         queryKey: ["user", comment.userId],
         queryFn: () => getUser(comment.userId),
@@ -133,16 +135,20 @@ function Comment({ comment }) {
                         <div className="flex justify-start max-w-fit border-t border-gray-600 pt-2 gap-2 items-center text-xs text-gray-400">
                             <button
                                 className={`${
-                                    likes.includes(currentUser._id)
+                                    likes.includes(currentUser?._id)
                                         ? "text-blue-500"
                                         : ""
                                 } hover:text-blue-500`}
-                                onClick={() =>
+                                onClick={() => {
+                                    if (!currentUser) {
+                                        navigate("/sign-in");
+                                        return;
+                                    }
                                     likeCommentMutate({
                                         commentId: comment._id,
-                                        userId: currentUser._id,
+                                        userId: currentUser?._id,
                                     })
-                                }
+                                }}
                             >
                                 <FaThumbsUp className="w-4 h-4" />
                             </button>
@@ -153,10 +159,10 @@ function Comment({ comment }) {
                                         : `${numberOfLikes} like`}
                                 </p>
                             )}
-                            {(currentUser._id === user?._id ||
-                                currentUser.isAdmin) && (
+                            {(currentUser?._id === user?._id ||
+                                currentUser?.isAdmin) && (
                                 <>
-                                    {currentUser._id === user?._id && (
+                                    {currentUser?._id === user?._id && (
                                         <button
                                             className="hover:text-blue-500"
                                             onClick={() => setIsEdit(true)}
