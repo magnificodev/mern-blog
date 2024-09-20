@@ -1,6 +1,23 @@
-export const getPostComments = async (postId) => {
+export const getPostComments = async ({ postId, skip, limit, order }) => {
     try {
-        const response = await fetch(`/api/comments/${postId}`);
+        const url = new URL(
+            `/api/v1/posts/${postId}/comments`,
+            window.location.origin
+        );
+
+        const params = {
+            skip,
+            limit,
+            order,
+        };
+
+        Object.keys(params).forEach((key) => {
+            if (!!params[key]) {
+                url.searchParams.set(key, params[key]);
+            }
+        });
+
+        const response = await fetch(url);
         const responseBody = await response.json();
 
         if (responseBody.status === "failure") {
@@ -13,14 +30,14 @@ export const getPostComments = async (postId) => {
     }
 };
 
-export const createComment = async ({ content, postId, userId }) => {
+export const createComment = async (commentData) => {
     try {
-        const response = await fetch("/api/comments", {
+        const response = await fetch("/api/v1/comments", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ content, postId, userId }),
+            body: JSON.stringify(commentData),
         });
 
         const responseBody = await response.json();
@@ -37,7 +54,7 @@ export const createComment = async ({ content, postId, userId }) => {
 
 export const likeComment = async ({ commentId, userId }) => {
     try {
-        const response = await fetch(`/api/comments/${commentId}/likes`, {
+        const response = await fetch(`/api/v1/comments/${commentId}/likes`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -59,7 +76,7 @@ export const likeComment = async ({ commentId, userId }) => {
 
 export const editComment = async ({ commentId, content }) => {
     try {
-        const response = await fetch(`/api/comments/${commentId}`, {
+        const response = await fetch(`/api/v1/comments/${commentId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -79,9 +96,9 @@ export const editComment = async ({ commentId, content }) => {
     }
 };
 
-export const deleteComment = async ({ commentId }) => {
+export const deleteComment = async (commentId) => {
     try {
-        const response = await fetch(`/api/comments/${commentId}`, {
+        const response = await fetch(`/api/v1/comments/${commentId}`, {
             method: "DELETE",
         });
 

@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { FaThumbsUp, FaUserShield } from "react-icons/fa";
-import { Button, Spinner } from "flowbite-react";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUser } from "../api/users";
-import { likeComment, deleteComment, editComment } from "../api/comments";
-import { Modal, Textarea } from "flowbite-react";
+import { useEffect, useState } from "react";
+
 import moment from "moment";
+import { useSelector } from "react-redux";
+import { Button, Spinner } from "flowbite-react";
+import { Modal, Textarea } from "flowbite-react";
+
+import { FaThumbsUp, FaUserShield } from "react-icons/fa";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { getUser } from "../api/users";
+import { deleteComment, editComment, likeComment } from "../api/comments";
 
 function Comment({ comment }) {
     const { currentUser } = useSelector((state) => state.user);
@@ -21,12 +24,11 @@ function Comment({ comment }) {
 
     const { data } = useQuery({
         queryKey: ["user", comment.userId],
-        queryFn: () => getUser({ userId: comment.userId }),
+        queryFn: () => getUser(comment.userId),
     });
 
     const { mutate: likeCommentMutate } = useMutation({
-        mutationFn: ({ commentId, userId }) =>
-            likeComment({ commentId, userId }),
+        mutationFn: likeComment,
         onSuccess: (data) => {
             setLikes(data.data.comment.likes);
             setNumberOfLikes(data.data.comment.numberOfLikes);
@@ -37,7 +39,7 @@ function Comment({ comment }) {
     });
 
     const { mutate: deleteCommentMutate, isPending: isDeleting } = useMutation({
-        mutationFn: ({ commentId }) => deleteComment({ commentId }),
+        mutationFn: deleteComment,
         onSuccess: () => {
             setShowModal(false);
             queryClient.invalidateQueries({
@@ -47,8 +49,7 @@ function Comment({ comment }) {
     });
 
     const { mutate: editCommentMutate, isPending: isEditing } = useMutation({
-        mutationFn: ({ commentId, content }) =>
-            editComment({ commentId, content }),
+        mutationFn: editComment,
         onSuccess: () => {
             setIsEdit(false);
             queryClient.invalidateQueries({
@@ -193,9 +194,7 @@ function Comment({ comment }) {
                                 <Button
                                     color="failure"
                                     onClick={() =>
-                                        deleteCommentMutate({
-                                            commentId: comment._id,
-                                        })
+                                        deleteCommentMutate(comment._id)
                                     }
                                     disabled={isDeleting}
                                 >

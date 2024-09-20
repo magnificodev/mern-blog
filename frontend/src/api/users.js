@@ -24,7 +24,7 @@ export const getUsers = async ({ skip, limit, order } = {}) => {
     }
 };
 
-export const getUser = async ({ userId }) => {
+export const getUser = async (userId) => {
     try {
         const response = await fetch(`/api/v1/users/${userId}`);
         const responseBody = await response.json();

@@ -14,7 +14,7 @@ function PostPage() {
     const { postSlug } = useParams();
 
     const {
-        data: post,
+        data: currentPost,
         isLoading,
         isError,
     } = useQuery({
@@ -28,7 +28,7 @@ function PostPage() {
     });
 
     const recentPostsData = recentPosts?.data.posts;
-    const postData = post?.data.posts[0];
+    const postData = currentPost?.data.posts[0];
 
     if (isLoading)
         return (
@@ -46,7 +46,7 @@ function PostPage() {
                         {postData.title}
                     </h1>
                     {postData.category !== "uncategorized" &&
-                        postData.image && (
+                        postData.category && (
                             <Link
                                 to={`/search?category=${postData.category}`}
                                 className="mx-auto mt-5"
@@ -94,7 +94,7 @@ function PostPage() {
             <CommentSection postId={postData._id} />
             <div className="flex flex-col justify-center items-center mb-5">
                 <h1 className="text-xl mt-5">Recent Articles</h1>
-                {recentPostsData?.length > 0 ? (
+                {recentPostsData ? (
                     <div className="flex flex-wrap gap-5 mt-5 justify-center">
                         {recentPostsData.map((post) => (
                             <PostCard key={post._id} post={post} />

@@ -1,8 +1,12 @@
 import { Textarea, Button } from "flowbite-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+    useMutation,
+    useQueryClient,
+    useInfiniteQuery,
+} from "@tanstack/react-query";
 import { createComment, getPostComments } from "../api/comments";
 import { Spinner, Alert } from "flowbite-react";
 import Comment from "./Comment";
@@ -16,12 +20,26 @@ function CommentSection({ postId }) {
     const {
         data,
         isLoading,
-        isError: isQueryError,
-        error: queryError,
-    } = useQuery({
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey: ["comments", postId],
-        queryFn: () => getPostComments(postId),
-        refetchInterval: 3000, // Refetch every 3 seconds
+        queryFn: ({ pageParam }) =>
+            getPostComments({ postId, skip: (pageParam - 1) * 5 }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, pages) => {
+            if (
+                lastPage.data.comments.length < 5 ||
+                (lastPage.data.comments.length === 5 &&
+                    pages.length * 5 === lastPage.data.totalComments)
+            ) {
+                return undefined;
+            }
+            return pages.length + 1;
+        },
+        refetchInterval: 3000,
     });
 
     const {
@@ -45,15 +63,15 @@ function CommentSection({ postId }) {
         }
     };
 
-    if (isLoading) return <Spinner />;
-    if (isQueryError)
+    if (isLoading)
         return (
-            <Alert color="failure">
-                Error loading comments: {queryError.message}
-            </Alert>
+            <div className="flex items-center mx-auto">
+                <Spinner size="xl" />
+            </div>
         );
+    if (isError) return <p>There is something wrong</p>;
 
-    const comments = data?.data.comments || [];
+    const comments = data?.pages.flatMap((page) => page.data.comments) || [];
 
     return (
         <div className="max-w-2xl mx-auto w-full">
@@ -142,6 +160,17 @@ function CommentSection({ postId }) {
                 </>
             ) : (
                 <p className="text-sm my-5">No comments yet!</p>
+            )}
+            {hasNextPage && (
+                <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="w-full text-teal-500 self-center text-sm py-4 hover:underline"
+                >
+                    {isFetchingNextPage
+                        ? "Loading more..."
+                        : "Show more"}
+                </button>
             )}
         </div>
     );

@@ -3,13 +3,24 @@ import { MyError } from "../utils/error.handler.js";
 
 export const getPostComments = async (req, res, next) => {
     try {
-        const comments = await Comment.find({ postId: req.params.postId }).sort(
-            { createdAt: -1 }
-        );
+        const skip = parseInt(req.query.skip) || 0;
+        const limit = parseInt(req.query.limit) || 5;
+        const order = req.query.order === "asc" ? 1 : -1;
+
+        const comments = await Comment.find({ postId: req.params.postId })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: order });
+
+        const totalComments = await Comment.countDocuments({
+            postId: req.params.postId,
+        });
+
         res.status(200).json({
             status: "success",
             data: {
                 comments,
+                totalComments,
             },
         });
     } catch (err) {
