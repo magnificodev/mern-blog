@@ -11,7 +11,7 @@ import { createComment, getPostComments } from "../api/comments";
 import { Spinner, Alert } from "flowbite-react";
 import Comment from "./Comment";
 
-function CommentSection({ postId }) {
+const CommentSection = ({ postId }) => {
     const { currentUser } = useSelector((state) => state.user);
     const [remainingCharacters, setRemainingCharacters] = useState(300);
     const [comment, setComment] = useState("");

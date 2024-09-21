@@ -13,7 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUser } from "../api/users";
 import { deleteComment, editComment, likeComment } from "../api/comments";
 
-function Comment({ comment }) {
+const Comment = ({ comment }) => {
     const { currentUser } = useSelector((state) => state.user);
     const [user, setUser] = useState(null);
     const [likes, setLikes] = useState(comment.likes);

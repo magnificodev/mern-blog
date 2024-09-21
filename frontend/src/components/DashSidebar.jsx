@@ -52,7 +52,7 @@ const DashSidebar = () => {
                 <Sidebar.ItemGroup className="flex flex-col gap-1">
                     {currentUser.isAdmin && (
                         <Sidebar.Item
-                            href="/dashboard/?tab=dashboard"
+                            href="/dashboard?tab=dashboard"
                             icon={HiChartPie}
                             labelColor="dark"
                             active={tab === "dashboard"}
@@ -61,7 +61,7 @@ const DashSidebar = () => {
                         </Sidebar.Item>
                     )}
                     <Sidebar.Item
-                        href="/dashboard/?tab=profile"
+                        href="/dashboard?tab=profile"
                         icon={HiUser}
                         label={currentUser.isAdmin ? "Admin" : "User"}
                         labelColor="dark"
@@ -71,7 +71,7 @@ const DashSidebar = () => {
                     </Sidebar.Item>
                     {currentUser.isAdmin && (
                         <Sidebar.Item
-                            href="/dashboard/?tab=comments"
+                            href="/dashboard?tab=comments"
                             icon={HiAnnotation}
                             labelColor="dark"
                             active={tab === "comments"}
@@ -81,7 +81,7 @@ const DashSidebar = () => {
                     )}
                     {currentUser.isAdmin && (
                         <Sidebar.Item
-                            href="/dashboard/?tab=users"
+                            href="/dashboard?tab=users"
                             icon={HiOutlineUserGroup}
                             labelColor="dark"
                             active={tab === "users"}
@@ -91,7 +91,7 @@ const DashSidebar = () => {
                     )}
                     {currentUser.isAdmin && (
                         <Sidebar.Item
-                            href="/dashboard/?tab=posts"
+                            href="/dashboard?tab=posts"
                             icon={HiDocumentText}
                             labelColor="dark"
                             active={tab === "posts"}

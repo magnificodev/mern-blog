@@ -12,7 +12,7 @@ import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { getPosts, deletePost } from "../api/posts";
 import { useAppContext } from "../contexts/AppContext";
 
-function DashPosts() {
+const DashPosts = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [showModal, setShowModal] = useState(false);
     const [postIdToDelete, setPostIdToDelete] = useState(null);

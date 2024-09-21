@@ -11,7 +11,7 @@ import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { deleteUser, getUsers } from "../api/users";
 import { useAppContext } from "../contexts/AppContext";
 
-function DashUsers() {
+const DashUsers = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [showModal, setShowModal] = useState(false);
     const [userIdToDelete, setUserIdToDelete] = useState(null);
@@ -96,7 +96,9 @@ function DashUsers() {
                                         </Table.Cell>
                                         <Table.Cell>
                                             <span className="font-medium text-gray-900 dark:text-gray-300">
-                                                {user._id === currentUser._id ? `${user.username} (You)` : user.username}
+                                                {user._id === currentUser._id
+                                                    ? `${user.username} (You)`
+                                                    : user.username}
                                             </span>
                                         </Table.Cell>
                                         <Table.Cell>{user.email}</Table.Cell>
@@ -184,6 +186,6 @@ function DashUsers() {
             </Modal>
         </div>
     );
-}
+};
 
 export default DashUsers;

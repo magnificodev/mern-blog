@@ -11,7 +11,7 @@ import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { deleteComment, getComments } from "../api/comments";
 import { useAppContext } from "../contexts/AppContext";
 
-function DashComment() {
+const DashComments = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [showModal, setShowModal] = useState(false);
     const [commentIdToDelete, setCommentIdToDelete] = useState(null);
@@ -95,10 +95,10 @@ function DashComment() {
                                                 {comment.likes.length}
                                             </span>
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="break-all">
                                             {comment.postId}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="break-all">
                                             {comment.userId}
                                         </Table.Cell>
                                         <Table.Cell>
@@ -178,4 +178,4 @@ function DashComment() {
     );
 }
 
-export default DashComment;
+export default DashComments;
