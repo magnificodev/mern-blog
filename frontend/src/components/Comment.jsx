@@ -15,7 +15,6 @@ import { deleteComment, editComment, likeComment } from "../api/comments";
 
 const Comment = ({ comment }) => {
     const { currentUser } = useSelector((state) => state.user);
-    const [user, setUser] = useState(null);
     const [likes, setLikes] = useState(comment.likes);
     const [numberOfLikes, setNumberOfLikes] = useState(comment.numberOfLikes);
     const [showModal, setShowModal] = useState(false);
@@ -24,9 +23,10 @@ const Comment = ({ comment }) => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     
-    const { data } = useQuery({
+    const { data: user } = useQuery({
         queryKey: ["user", comment.userId],
         queryFn: () => getUser(comment.userId),
+        select: (data) => data.data.user,
     });
 
     const { mutate: likeCommentMutate } = useMutation({
@@ -59,10 +59,6 @@ const Comment = ({ comment }) => {
             });
         },
     });
-
-    useEffect(() => {
-        setUser(data?.data.user);
-    }, [data]);
 
     return (
         <div className="flex gap-3 items-start border-b border-gray-600 p-4">

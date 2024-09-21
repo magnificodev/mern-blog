@@ -33,12 +33,11 @@ const UpdatePost = () => {
     const navigate = useNavigate();
     const { register, setValue, getValues, handleSubmit, watch } = useForm();
 
-    const { data, isLoading, isError } = useQuery({
+    const { data: postData, isLoading, isError } = useQuery({
         queryKey: ["post", postId],
         queryFn: () => getPost(postId),
+        select: (data) => data.data.post,
     });
-
-    const postData = data?.data.post;
 
     useEffect(() => {
         if (postData) {

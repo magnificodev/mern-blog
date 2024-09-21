@@ -14,21 +14,20 @@ function PostPage() {
     const { postSlug } = useParams();
 
     const {
-        data: currentPost,
+        data: postData,
         isLoading,
         isError,
     } = useQuery({
         queryKey: ["post", postSlug],
         queryFn: () => getPosts({ slug: postSlug }),
+        select: (data) => data.data.posts[0],
     });
 
-    const { data: recentPosts } = useQuery({
+    const { data: recentPostsData } = useQuery({
         queryKey: ["recentPosts"],
         queryFn: () => getPosts({ limit: 3 }),
+        select: (data) => data.data.posts,
     });
-
-    const recentPostsData = recentPosts?.data.posts;
-    const postData = currentPost?.data.posts[0];
 
     if (isLoading)
         return (

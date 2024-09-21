@@ -42,6 +42,7 @@ const DashPosts = () => {
         },
         refetchInterval: 10000,
     });
+    console.log(data);
 
     const posts = data?.pages.flatMap((page) => page.data.posts) || [];
 

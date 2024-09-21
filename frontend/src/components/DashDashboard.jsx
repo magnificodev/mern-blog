@@ -19,22 +19,22 @@ const DashDashboard = () => {
     const { currentUser } = useSelector((state) => state.user);
     const navigate = useNavigate();
 
-    const { data: users, isLoading: isUsersLoading } = useQuery({
+    const { data: userData, isLoading: isUsersLoading } = useQuery({
         queryKey: ["users"],
         queryFn: getUsers,
-        staleTime: 0,
+        select: (data) => data.data,
     });
 
-    const { data: comments, isLoading: isCommentsLoading } = useQuery({
+    const { data: commentData, isLoading: isCommentsLoading } = useQuery({
         queryKey: ["comments"],
         queryFn: getComments,
-        staleTime: 0,
+        select: (data) => data.data,
     });
 
-    const { data: posts, isLoading: isPostsLoading } = useQuery({
+    const { data: postData, isLoading: isPostsLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: getPosts,
-        staleTime: 0,
+        select: (data) => data.data,
     });
 
     const { mutate: getPostMutate } = useMutation({
@@ -61,14 +61,14 @@ const DashDashboard = () => {
                             <h3 className="text-gray-500 text-md uppercase">
                                 Total Users
                             </h3>
-                            <p className="text-2xl">{users?.data.totalUsers}</p>
+                            <p className="text-2xl">{userData?.totalUsers}</p>
                         </div>
                         <HiOutlineUserGroup className="bg-teal-600  text-white rounded-full text-5xl p-3 shadow-lg" />
                     </div>
                     <div className="flex  gap-2 text-sm">
                         <span className="text-green-500 flex items-center">
                             <HiArrowNarrowUp />
-                            {users?.data.lastMonthUsers}
+                            {userData?.lastMonthUsers}
                         </span>
                         <div className="text-gray-500">Last month</div>
                     </div>
@@ -80,7 +80,7 @@ const DashDashboard = () => {
                                 Total Comments
                             </h3>
                             <p className="text-2xl">
-                                {comments?.data.totalComments}
+                                {commentData?.totalComments}
                             </p>
                         </div>
                         <HiAnnotation className="bg-indigo-600  text-white rounded-full text-5xl p-3 shadow-lg" />
@@ -88,7 +88,7 @@ const DashDashboard = () => {
                     <div className="flex  gap-2 text-sm">
                         <span className="text-green-500 flex items-center">
                             <HiArrowNarrowUp />
-                            {comments?.data.lastMonthComments}
+                            {commentData?.lastMonthComments}
                         </span>
                         <div className="text-gray-500">Last month</div>
                     </div>
@@ -99,14 +99,14 @@ const DashDashboard = () => {
                             <h3 className="text-gray-500 text-md uppercase">
                                 Total Posts
                             </h3>
-                            <p className="text-2xl">{posts?.data.totalPosts}</p>
+                            <p className="text-2xl">{postData?.totalPosts}</p>
                         </div>
                         <HiDocumentText className="bg-lime-600  text-white rounded-full text-5xl p-3 shadow-lg" />
                     </div>
                     <div className="flex  gap-2 text-sm">
                         <span className="text-green-500 flex items-center">
                             <HiArrowNarrowUp />
-                            {posts?.data.lastMonthPosts}
+                            {postData?.lastMonthPosts}
                         </span>
                         <div className="text-gray-500">Last month</div>
                     </div>
@@ -119,152 +119,149 @@ const DashDashboard = () => {
                 <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                     <div className="flex justify-between items-center p-3 text-sm font-semibold">
                         <h1 className="text-center p-2">Recent users</h1>
-                        <a
-                            href="/dashboard?tab=users"
-                            className="text-green-500 hover:underline"
-                        >
-                            See all
-                        </a>
+                        {userData?.users.length > 0 && (
+                            <a
+                                href="/dashboard?tab=users"
+                                className="text-green-500 hover:underline"
+                            >
+                                See all
+                            </a>
+                        )}
                     </div>
-                    {users?.data.users.length > 0 ? (
+                    {userData?.users.length > 0 ? (
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell>User image</Table.HeadCell>
                                 <Table.HeadCell>Username</Table.HeadCell>
                             </Table.Head>
-                            {users?.data.users &&
-                                users.data.users.map((user) => (
-                                    <Table.Body
-                                        key={user._id}
-                                        className="divide-y"
-                                    >
-                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                            <Table.Cell>
-                                                <img
-                                                    src={user.profilePic}
-                                                    alt="user"
-                                                    className="w-10 h-10 rounded-full bg-gray-500 object-cover"
-                                                />
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                <span className="font-medium text-gray-900 dark:text-gray-300">
-                                                    {user._id ===
-                                                    currentUser._id
-                                                        ? `${user.username} (You)`
-                                                        : user.username}
-                                                </span>
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    </Table.Body>
-                                ))}
+                            {userData.users.map((user) => (
+                                <Table.Body key={user._id} className="divide-y">
+                                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                        <Table.Cell>
+                                            <img
+                                                src={user.profilePic}
+                                                alt="user"
+                                                className="w-10 h-10 rounded-full bg-gray-500 object-cover"
+                                            />
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <span className="font-medium text-gray-900 dark:text-gray-300">
+                                                {user._id === currentUser._id
+                                                    ? `${user.username} (You)`
+                                                    : user.username}
+                                            </span>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                </Table.Body>
+                            ))}
                         </Table>
                     ) : (
-                        <p>No users found</p>
+                        <p className="text-center mb-3">No users found</p>
                     )}
                 </div>
                 <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                     <div className="flex justify-between items-center p-3 text-sm font-semibold">
                         <h1 className="text-center p-2">Recent comments</h1>
-                        <a
-                            href="/dashboard?tab=comments"
-                            className="text-green-500 hover:underline"
-                        >
-                            See all
-                        </a>
+                        {commentData?.comments.length > 0 && (
+                            <a
+                                href="/dashboard?tab=comments"
+                                className="text-green-500 hover:underline"
+                            >
+                                See all
+                            </a>
+                        )}
                     </div>
-                    {comments?.data.comments.length > 0 ? (
+                    {commentData?.comments.length > 0 ? (
+
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell>Comment content</Table.HeadCell>
                                 <Table.HeadCell>Likes</Table.HeadCell>
                             </Table.Head>
-                            {comments?.data.comments &&
-                                comments.data.comments.map((comment) => (
-                                    <Table.Body
-                                        key={comment._id}
-                                        className="divide-y"
-                                    >
-                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                            <Table.Cell className="w-96">
-                                                <p
-                                                    onClick={() =>
-                                                        getPostMutate(
-                                                            comment.postId
-                                                        )
-                                                    }
-                                                    className="line-clamp-2 cursor-pointer"
-                                                    title={comment.content}
-                                                >
-                                                    {comment.content}
-                                                </p>
-                                            </Table.Cell>
-                                            <Table.Cell className="text-center">
-                                                <span className="font-medium text-gray-900 dark:text-gray-300">
-                                                    {comment.numberOfLikes}
-                                                </span>
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    </Table.Body>
-                                ))}
+                            {commentData.comments.map((comment) => (
+                                <Table.Body
+                                    key={comment._id}
+                                    className="divide-y"
+                                >
+                                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                        <Table.Cell className="w-96">
+                                            <p
+                                                onClick={() =>
+                                                    getPostMutate(
+                                                        comment.postId
+                                                    )
+                                                }
+                                                className="line-clamp-2 cursor-pointer"
+                                                title={comment.content}
+                                            >
+                                                {comment.content}
+                                            </p>
+                                        </Table.Cell>
+                                        <Table.Cell className="text-center">
+                                            <span className="font-medium text-gray-900 dark:text-gray-300">
+                                                {comment.numberOfLikes}
+                                            </span>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                </Table.Body>
+                            ))}
                         </Table>
                     ) : (
-                        <p>No comments found</p>
+                        <p className="text-center mb-3">No comments found</p>
                     )}
                 </div>
                 <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                     <div className="flex justify-between items-center p-3 text-sm font-semibold">
                         <h1 className="text-center p-2">Recent posts</h1>
-                        <a
-                            href="/dashboard?tab=posts"
-                            className="text-green-500 hover:underline"
-                        >
+                        {postData?.posts.length > 0 && (
+                            <a
+                                href="/dashboard?tab=posts"
+                                className="text-green-500 hover:underline"
+                            >
                             See all
                         </a>
+                    )}
                     </div>
-                    {posts?.data.posts.length > 0 ? (
+                    {postData?.posts.length > 0 ? (
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell>Post image</Table.HeadCell>
                                 <Table.HeadCell>Post Title</Table.HeadCell>
                                 <Table.HeadCell>Category</Table.HeadCell>
                             </Table.Head>
-                            {posts?.data.posts &&
-                                posts.data.posts.map((post) => (
-                                    <Table.Body
-                                        key={post._id}
-                                        className="divide-y"
-                                    >
-                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                            <Table.Cell>
-                                                <Link to={`/post/${post.slug}`}>
-                                                    <img
-                                                        src={post.image}
-                                                        alt="user"
-                                                        className="w-14 h-10 rounded-md bg-gray-500 object-cover"
-                                                    />
-                                                </Link>
-                                            </Table.Cell>
-                                            <Table.Cell className="w-96">
-                                                <Link
-                                                    className="font-medium text-gray-900 dark:text-gray-300"
-                                                    title={post.title}
-                                                    to={`/post/${post.slug}`}
-                                                >
-                                                    {post.title}
-                                                </Link>
-                                            </Table.Cell>
-                                            <Table.Cell className="w-5">
-                                                {post.category
-                                                    .charAt(0)
-                                                    .toUpperCase() +
-                                                    post.category.slice(1)}
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    </Table.Body>
-                                ))}
+                            {postData.posts.map((post) => (
+                                <Table.Body key={post._id} className="divide-y">
+                                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                        <Table.Cell>
+                                            <Link to={`/post/${post.slug}`}>
+                                                <img
+                                                    src={post.image}
+                                                    alt="user"
+                                                    className="w-14 h-10 rounded-md bg-gray-500 object-cover"
+                                                />
+                                            </Link>
+                                        </Table.Cell>
+                                        <Table.Cell className="w-96">
+                                            <Link
+                                                className="font-medium text-gray-900 dark:text-gray-300"
+                                                title={post.title}
+                                                to={`/post/${post.slug}`}
+                                            >
+                                                {post.title}
+                                            </Link>
+                                        </Table.Cell>
+                                        <Table.Cell className="w-5">
+                                            {post.category
+                                                .charAt(0)
+                                                .toUpperCase() +
+                                                post.category.slice(1)}
+                                        </Table.Cell>
+                                    </Table.Row>
+                                </Table.Body>
+                            ))}
                         </Table>
                     ) : (
-                        <p>No posts found</p>
+                        <p className="text-center mb-3">No posts found</p>
                     )}
                 </div>
             </div>
