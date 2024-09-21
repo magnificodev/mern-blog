@@ -4,12 +4,13 @@ import { useSelector } from "react-redux";
 import { format } from "date-fns";
 import { Button, Modal, Spinner, Table } from "flowbite-react";
 
-import { FaCheck, FaTimes } from "react-icons/fa";
 import { useQueryClient } from "@tanstack/react-query";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 import { deleteComment, getComments } from "../api/comments";
 import { useAppContext } from "../contexts/AppContext";
+import { useNavigate } from "react-router-dom";
+import { getPost } from "../api/posts";
 
 const DashComments = () => {
     const { currentUser } = useSelector((state) => state.user);
@@ -17,6 +18,7 @@ const DashComments = () => {
     const [commentIdToDelete, setCommentIdToDelete] = useState(null);
     const { showToast } = useAppContext();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const {
         data,
@@ -43,6 +45,13 @@ const DashComments = () => {
     });
 
     const comments = data?.pages.flatMap((page) => page.data.comments) || [];
+
+    const { mutate: getPostMutate } = useMutation({
+        mutationFn: getPost,
+        onSuccess: (data) => {
+            navigate(`/post/${data.data.post.slug}`);
+        },
+    });
 
     const { mutate: deleteCommentMutate, isPending: isDeleting } = useMutation({
         mutationFn: deleteComment,
@@ -88,11 +97,21 @@ const DashComments = () => {
                                             )}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            {comment.content}
+                                            <p
+                                                onClick={() =>
+                                                    getPostMutate(
+                                                        comment.postId
+                                                    )
+                                                }
+                                                className="cursor-pointer line-clamp-2"
+                                                title={comment.content}
+                                            >
+                                                {comment.content}
+                                            </p>
                                         </Table.Cell>
                                         <Table.Cell>
                                             <span className="font-medium text-gray-900 dark:text-gray-300">
-                                                {comment.likes.length}
+                                                {comment.numberOfLikes}
                                             </span>
                                         </Table.Cell>
                                         <Table.Cell className="break-all">
@@ -150,7 +169,9 @@ const DashComments = () => {
                         <div className="flex justify-center gap-4">
                             <Button
                                 color="failure"
-                                onClick={() => deleteCommentMutate(commentIdToDelete)}
+                                onClick={() =>
+                                    deleteCommentMutate(commentIdToDelete)
+                                }
                                 disabled={isDeleting}
                             >
                                 {isDeleting ? (
@@ -176,6 +197,6 @@ const DashComments = () => {
             </Modal>
         </div>
     );
-}
+};
 
 export default DashComments;

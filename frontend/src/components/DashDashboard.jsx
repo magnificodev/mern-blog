@@ -4,8 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getUsers } from "../api/users";
 import { getComments } from "../api/comments";
 import { getPosts } from "../api/posts";
-import { Link } from "react-router-dom";
-import { Button, Table } from "flowbite-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Spinner, Table } from "flowbite-react";
+import { useMutation } from "@tanstack/react-query";
+import { getPost } from "../api/posts";
 import {
     HiOutlineUserGroup,
     HiAnnotation,
@@ -15,6 +17,7 @@ import {
 
 const DashDashboard = () => {
     const { currentUser } = useSelector((state) => state.user);
+    const navigate = useNavigate();
 
     const { data: users, isLoading: isUsersLoading } = useQuery({
         queryKey: ["users"],
@@ -28,14 +31,29 @@ const DashDashboard = () => {
         staleTime: 0,
     });
 
-    const { data: posts, isLoading } = useQuery({
+    const { data: posts, isLoading: isPostsLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: getPosts,
         staleTime: 0,
     });
 
+    const { mutate: getPostMutate } = useMutation({
+        mutationFn: getPost,
+        onSuccess: (data) => {
+            navigate(`/post/${data.data.post.slug}`);
+        },
+    });
+
+    if (isUsersLoading && isCommentsLoading && isPostsLoading) {
+        return (
+            <div className="flex items-center mx-auto">
+                <Spinner size="xl" />
+            </div>
+        );
+    }
+
     return (
-        <div className="p-3 md:mx-auto">
+        <div className="flex-1 p-3 overflow-hidden">
             <div className="flex-wrap flex gap-4 justify-center">
                 <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
                     <div className="flex justify-between">
@@ -108,27 +126,41 @@ const DashDashboard = () => {
                             See all
                         </a>
                     </div>
-                    <Table hoverable>
-                        <Table.Head>
-                            <Table.HeadCell>User image</Table.HeadCell>
-                            <Table.HeadCell>Username</Table.HeadCell>
-                        </Table.Head>
-                        {users?.data.users &&
-                            users.data.users.map((user) => (
-                                <Table.Body key={user._id} className="divide-y">
-                                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                        <Table.Cell>
-                                            <img
-                                                src={user.profilePic}
-                                                alt="user"
-                                                className="w-10 h-10 rounded-full bg-gray-500"
-                                            />
-                                        </Table.Cell>
-                                        <Table.Cell>{user.username}</Table.Cell>
-                                    </Table.Row>
-                                </Table.Body>
-                            ))}
-                    </Table>
+                    {users?.data.users.length > 0 ? (
+                        <Table hoverable>
+                            <Table.Head>
+                                <Table.HeadCell>User image</Table.HeadCell>
+                                <Table.HeadCell>Username</Table.HeadCell>
+                            </Table.Head>
+                            {users?.data.users &&
+                                users.data.users.map((user) => (
+                                    <Table.Body
+                                        key={user._id}
+                                        className="divide-y"
+                                    >
+                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                            <Table.Cell>
+                                                <img
+                                                    src={user.profilePic}
+                                                    alt="user"
+                                                    className="w-10 h-10 rounded-full bg-gray-500 object-cover"
+                                                />
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <span className="font-medium text-gray-900 dark:text-gray-300">
+                                                    {user._id ===
+                                                    currentUser._id
+                                                        ? `${user.username} (You)`
+                                                        : user.username}
+                                                </span>
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    </Table.Body>
+                                ))}
+                        </Table>
+                    ) : (
+                        <p>No users found</p>
+                    )}
                 </div>
                 <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                     <div className="flex justify-between items-center p-3 text-sm font-semibold">
@@ -140,30 +172,44 @@ const DashDashboard = () => {
                             See all
                         </a>
                     </div>
-                    <Table hoverable>
-                        <Table.Head>
-                            <Table.HeadCell>Comment content</Table.HeadCell>
-                            <Table.HeadCell>Likes</Table.HeadCell>
-                        </Table.Head>
-                        {comments?.data.comments &&
-                            comments.data.comments.map((comment) => (
-                                <Table.Body
-                                    key={comment._id}
-                                    className="divide-y"
-                                >
-                                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                        <Table.Cell className="w-96">
-                                            <p className="line-clamp-2">
-                                                {comment.content}
-                                            </p>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            {comment.numberOfLikes}
-                                        </Table.Cell>
-                                    </Table.Row>
-                                </Table.Body>
-                            ))}
-                    </Table>
+                    {comments?.data.comments.length > 0 ? (
+                        <Table hoverable>
+                            <Table.Head>
+                                <Table.HeadCell>Comment content</Table.HeadCell>
+                                <Table.HeadCell>Likes</Table.HeadCell>
+                            </Table.Head>
+                            {comments?.data.comments &&
+                                comments.data.comments.map((comment) => (
+                                    <Table.Body
+                                        key={comment._id}
+                                        className="divide-y"
+                                    >
+                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                            <Table.Cell className="w-96">
+                                                <p
+                                                    onClick={() =>
+                                                        getPostMutate(
+                                                            comment.postId
+                                                        )
+                                                    }
+                                                    className="line-clamp-2 cursor-pointer"
+                                                    title={comment.content}
+                                                >
+                                                    {comment.content}
+                                                </p>
+                                            </Table.Cell>
+                                            <Table.Cell className="text-center">
+                                                <span className="font-medium text-gray-900 dark:text-gray-300">
+                                                    {comment.numberOfLikes}
+                                                </span>
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    </Table.Body>
+                                ))}
+                        </Table>
+                    ) : (
+                        <p>No comments found</p>
+                    )}
                 </div>
                 <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                     <div className="flex justify-between items-center p-3 text-sm font-semibold">
@@ -175,33 +221,51 @@ const DashDashboard = () => {
                             See all
                         </a>
                     </div>
-                    <Table hoverable>
-                        <Table.Head>
-                            <Table.HeadCell>Post image</Table.HeadCell>
-                            <Table.HeadCell>Post Title</Table.HeadCell>
-                            <Table.HeadCell>Category</Table.HeadCell>
-                        </Table.Head>
-                        {posts?.data.posts &&
-                            posts.data.posts.map((post) => (
-                                <Table.Body key={post._id} className="divide-y">
-                                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                        <Table.Cell>
-                                            <img
-                                                src={post.image}
-                                                alt="user"
-                                                className="w-14 h-10 rounded-md bg-gray-500"
-                                            />
-                                        </Table.Cell>
-                                        <Table.Cell className="w-96">
-                                            {post.title}
-                                        </Table.Cell>
-                                        <Table.Cell className="w-5">
-                                            {post.category}
-                                        </Table.Cell>
-                                    </Table.Row>
-                                </Table.Body>
-                            ))}
-                    </Table>
+                    {posts?.data.posts.length > 0 ? (
+                        <Table hoverable>
+                            <Table.Head>
+                                <Table.HeadCell>Post image</Table.HeadCell>
+                                <Table.HeadCell>Post Title</Table.HeadCell>
+                                <Table.HeadCell>Category</Table.HeadCell>
+                            </Table.Head>
+                            {posts?.data.posts &&
+                                posts.data.posts.map((post) => (
+                                    <Table.Body
+                                        key={post._id}
+                                        className="divide-y"
+                                    >
+                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                            <Table.Cell>
+                                                <Link to={`/post/${post.slug}`}>
+                                                    <img
+                                                        src={post.image}
+                                                        alt="user"
+                                                        className="w-14 h-10 rounded-md bg-gray-500 object-cover"
+                                                    />
+                                                </Link>
+                                            </Table.Cell>
+                                            <Table.Cell className="w-96">
+                                                <Link
+                                                    className="font-medium text-gray-900 dark:text-gray-300"
+                                                    title={post.title}
+                                                    to={`/post/${post.slug}`}
+                                                >
+                                                    {post.title}
+                                                </Link>
+                                            </Table.Cell>
+                                            <Table.Cell className="w-5">
+                                                {post.category
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    post.category.slice(1)}
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    </Table.Body>
+                                ))}
+                        </Table>
+                    ) : (
+                        <p>No posts found</p>
+                    )}
                 </div>
             </div>
         </div>

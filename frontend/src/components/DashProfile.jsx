@@ -157,6 +157,7 @@ const DashProfile = () => {
         }
     }, [imageFile]);
 
+
     if (mutationSignOut.isPending) {
         return (
             <div className="flex flex-col justify-center items-center w-full gap-4">

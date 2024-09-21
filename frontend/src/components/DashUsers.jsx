@@ -95,7 +95,7 @@ const DashUsers = () => {
                                             />
                                         </Table.Cell>
                                         <Table.Cell>
-                                            <span className="font-medium text-gray-900 dark:text-gray-300">
+                                            <span className="font-medium text-gray-900 dark:text-gray-300 object-cover">
                                                 {user._id === currentUser._id
                                                     ? `${user.username} (You)`
                                                     : user.username}

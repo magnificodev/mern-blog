@@ -92,8 +92,8 @@ const DashPosts = () => {
                                             <Link to={`/post/${post.slug}`}>
                                                 <img
                                                     src={post.image}
-                                                    alt="Post image"
-                                                    className="w-20 h-10 object-cover"
+                                                    alt="user"
+                                                    className="w-14 h-10 rounded-md bg-gray-500 object-cover"
                                                 />
                                             </Link>
                                         </Table.Cell>
@@ -193,6 +193,6 @@ const DashPosts = () => {
             </Modal>
         </div>
     );
-}
+};
 
 export default DashPosts;
