@@ -1,47 +1,60 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { Table, Spinner, Modal, Button } from "flowbite-react";
 import { format } from "date-fns";
-import { FaCheck, FaTimes } from "react-icons/fa";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { getPostComments, deleteComment } from "../api/comments";
+import { Button, Modal, Spinner, Table } from "flowbite-react";
 
-function DashComments() {
+import { FaCheck, FaTimes } from "react-icons/fa";
+import { useQueryClient } from "@tanstack/react-query";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+
+import { deleteComment, getComments } from "../api/comments";
+import { useAppContext } from "../contexts/AppContext";
+
+function DashComment() {
     const { currentUser } = useSelector((state) => state.user);
-    const [comments, setComments] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [commentIdToDelete, setCommentIdToDelete] = useState(null);
+    const { showToast } = useAppContext();
+    const queryClient = useQueryClient();
 
-    const { data, fetchNextPage, hasNextPage, isLoading, isError } =
-        useInfiniteQuery({
-            queryKey: ["comments"],
-            queryFn: ({ pageParam = 1 }) => getPostComments({ pageParam }),
-            getNextPageParam: (lastPage, allPages) =>
-                lastPage.data.totalPages > allPages.length
-                    ? allPages.length + 1
-                    : undefined,
-        });
-
-    const { mutate: deleteCommentMutate, isLoading: isDeleting } = useMutation({
-        mutationFn: (commentId) => deleteComment(commentId),
-        onSuccess: () => {
-            setShowModal(false);
-            setComments(comments.filter((comment) => comment._id !== commentIdToDelete));
-            setCommentIdToDelete("");
+    const {
+        data,
+        isLoading,
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ["comments"],
+        queryFn: ({ pageParam }) => getComments({ skip: (pageParam - 1) * 5 }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, pages) => {
+            if (
+                lastPage.data.comments.length < 5 ||
+                (lastPage.data.comments.length === 5 &&
+                    pages.length * 5 === lastPage.data.totalComments)
+            ) {
+                return undefined;
+            }
+            return pages.length + 1;
         },
+        refetchInterval: 10000,
     });
 
-    const handleDeleteComment = () => {
-        deleteCommentMutate(commentIdToDelete);
-    };
+    const comments = data?.pages.flatMap((page) => page.data.comments) || [];
 
-    useEffect(() => {
-        if (data) {
-            const newComments = data.pages.slice(-1).flatMap((page) => page.data.comments);
-            setComments(prev => [...prev, ...newComments]);
-        }
-    }, [data]);
+    const { mutate: deleteCommentMutate, isPending: isDeleting } = useMutation({
+        mutationFn: deleteComment,
+        onSuccess: (data) => {
+            showToast({ type: data.status, message: data.message });
+            queryClient.invalidateQueries(["comments"]);
+            setShowModal(false);
+        },
+        onError: (err) => {
+            showToast({ type: "failure", message: err.message });
+        },
+    });
 
     if (isLoading)
         return (
@@ -59,10 +72,10 @@ function DashComments() {
                         <Table hoverable striped>
                             <Table.Head>
                                 <Table.HeadCell>Date Updated</Table.HeadCell>
-                                <Table.HeadCell>User Image</Table.HeadCell>
-                                <Table.HeadCell>Username</Table.HeadCell>
-                                <Table.HeadCell>Email</Table.HeadCell>
-                                <Table.HeadCell>Admin</Table.HeadCell>
+                                <Table.HeadCell>Comment Content</Table.HeadCell>
+                                <Table.HeadCell>Number of Likes</Table.HeadCell>
+                                <Table.HeadCell>Post ID</Table.HeadCell>
+                                <Table.HeadCell>User ID</Table.HeadCell>
                                 <Table.HeadCell>Delete</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
@@ -70,41 +83,33 @@ function DashComments() {
                                     <Table.Row key={comment._id}>
                                         <Table.Cell>
                                             {format(
-                                                new Date(comment.createdAt),
+                                                new Date(comment.updatedAt),
                                                 "dd/MM/yyyy"
                                             )}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            <img
-                                                src={comment.user.profilePic}
-                                                alt={comment.user.username}
-                                                className="w-10 h-10 rounded-full"
-                                            />
+                                            {comment.content}
                                         </Table.Cell>
                                         <Table.Cell>
                                             <span className="font-medium text-gray-900 dark:text-gray-300">
-                                                {comment.user.username}
+                                                {comment.likes.length}
                                             </span>
                                         </Table.Cell>
-                                        <Table.Cell>{comment.user.email}</Table.Cell>
                                         <Table.Cell>
-                                            {comment.user.isAdmin ? (
-                                                <FaCheck className="text-green-500" />
-                                            ) : (
-                                                <FaTimes className="text-red-500" />
-                                            )}
+                                            {comment.postId}
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            {comment.userId}
                                         </Table.Cell>
                                         <Table.Cell>
                                             <button
                                                 className="font-medium text-red-500 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                                                 onClick={() => {
                                                     setShowModal(true);
-                                                    setCommentIdToDelete(comment._id);
+                                                    setCommentIdToDelete(
+                                                        comment._id
+                                                    );
                                                 }}
-                                                disabled={
-                                                    comment.user.isAdmin ||
-                                                    comment.user._id === currentUser._id
-                                                }
                                             >
                                                 Delete
                                             </button>
@@ -117,58 +122,60 @@ function DashComments() {
                     {hasNextPage && (
                         <button
                             onClick={() => fetchNextPage()}
+                            disabled={isFetchingNextPage}
                             className="w-full text-teal-500 self-center text-sm py-4 hover:underline"
                         >
-                            Show more
+                            {isFetchingNextPage
+                                ? "Loading more..."
+                                : "Show more"}
                         </button>
                     )}
                 </>
             ) : (
                 <p>No users found</p>
             )}
-            {showModal && (
-                <Modal
-                    show={showModal}
-                    onClose={() => setShowModal(false)}
-                    popup
-                    size="md"
-                >
-                    <Modal.Header />
-                    <Modal.Body>
-                        <div className="text-center">
-                            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-                            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                                Are you sure you want to delete this user?
-                            </h3>
-                            <div className="flex justify-center gap-4">
-                                <Button
-                                    color="failure"
-                                    onClick={handleDeleteUser}
-                                >
-                                    {isDeleting ? (
-                                        <>
-                                            <Spinner size="sm" />
-                                            <span className="ml-2">
-                                                Deleting...
-                                            </span>
-                                        </>
-                                    ) : (
-                                        "Yes, I'm sure"
-                                    )}
-                                </Button>
-                                <Button
-                                    color="gray"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    No, cancel
-                                </Button>
-                            </div>
+            <Modal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                popup
+                size="md"
+            >
+                <Modal.Header />
+                <Modal.Body>
+                    <div className="text-center">
+                        <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
+                        <h3 className="mb-5 text-lg text-gray-500 dark:text-gray-400">
+                            Are you sure you want to delete this comment?
+                        </h3>
+                        <div className="flex justify-center gap-4">
+                            <Button
+                                color="failure"
+                                onClick={() => deleteCommentMutate(commentIdToDelete)}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <Spinner size="sm" />
+                                        <span className="ml-2">
+                                            Deleting...
+                                        </span>
+                                    </>
+                                ) : (
+                                    "Yes, I'm sure"
+                                )}
+                            </Button>
+                            <Button
+                                color="gray"
+                                onClick={() => setShowModal(false)}
+                            >
+                                No, cancel
+                            </Button>
                         </div>
-                    </Modal.Body>
-                </Modal>
-            )}
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }
 
-export default DashComments;
+export default DashComment;

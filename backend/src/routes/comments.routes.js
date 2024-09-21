@@ -3,6 +3,7 @@ import verifyToken from "../middlewares/auth.middleware.js";
 import {
     createComment,
     getPostComments,
+    getComments,
     likeComment,
     deleteComment,
     editComment,
@@ -10,6 +11,7 @@ import {
 
 const router = express.Router();
 
+router.get("/", getComments);
 router.get("/:postId", getPostComments);
 router.post("/", verifyToken, createComment);
 router.patch("/:commentId/likes", verifyToken, likeComment);

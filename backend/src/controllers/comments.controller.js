@@ -28,6 +28,44 @@ export const getPostComments = async (req, res, next) => {
     }
 };
 
+export const getComments = async (req, res, next) => {
+    try {
+        const skip = parseInt(req.query.skip) || 0;
+        const limit = parseInt(req.query.limit) || 5;
+        const order = req.query.order === "asc" ? 1 : -1;
+
+        const comments = await Comment.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: order });
+
+        const totalComments = await Comment.countDocuments();
+
+        const now = new Date();
+
+        const oneMonthAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            now.getDate()
+        );
+
+        const lastMonthComments = await Comment.countDocuments({
+            createdAt: { $gte: oneMonthAgo },
+        });
+
+        res.status(200).json({
+            status: "success",
+            data: {
+                comments,
+                totalComments,
+                lastMonthComments,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const createComment = async (req, res, next) => {
     try {
         const { content, userId, postId } = req.body;

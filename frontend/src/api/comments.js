@@ -30,6 +30,35 @@ export const getPostComments = async ({ postId, skip, limit, order }) => {
     }
 };
 
+export const getComments = async ({ skip, limit, order }) => {
+    try {
+        const url = new URL(`/api/v1/comments`, window.location.origin);
+
+        const params = {
+            skip,
+            limit,
+            order,
+        };
+
+        Object.keys(params).forEach((key) => {
+            if (!!params[key]) {
+                url.searchParams.set(key, params[key]);
+            }
+        });
+
+        const response = await fetch(url);
+        const responseBody = await response.json();
+
+        if (responseBody.status === "failure") {
+            throw new Error(responseBody.message);
+        }
+
+        return responseBody;
+    } catch (err) {
+        throw new Error(err.message);
+    }
+};
+
 export const createComment = async (commentData) => {
     try {
         const response = await fetch("/api/v1/comments", {

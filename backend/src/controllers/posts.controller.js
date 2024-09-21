@@ -179,6 +179,7 @@ export const deletePost = async (req, res, next) => {
         }
 
         await Post.findByIdAndDelete(req.params.postId);
+        await Comment.deleteMany({ postId: req.params.postId });
 
         res.status(200).json({
             status: "success",

@@ -39,12 +39,13 @@ function DashUsers() {
             }
             return pages.length + 1;
         },
+        refetchInterval: 10000,
     });
 
     const users = data?.pages.flatMap((page) => page.data.users) || [];
 
-    const { mutate: deleteUserMutate, isLoading: isDeleting } = useMutation({
-        mutationFn: (userId) => deleteUser(userId),
+    const { mutate: deleteUserMutate, isPending: isDeleting } = useMutation({
+        mutationFn: deleteUser,
         onSuccess: (data) => {
             showToast({ type: data.status, message: data.message });
             queryClient.invalidateQueries(["users"]);

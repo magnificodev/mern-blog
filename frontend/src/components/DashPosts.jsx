@@ -40,6 +40,7 @@ function DashPosts() {
             }
             return pages.length + 1;
         },
+        refetchInterval: 10000,
     });
 
     const posts = data?.pages.flatMap((page) => page.data.posts) || [];

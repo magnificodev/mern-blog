@@ -1,5 +1,7 @@
 import { MyError } from "../utils/error.handler.js";
 import User from "../models/user.model.js";
+import Post from "../models/post.model.js";
+import Comment from "../models/comment.model.js";
 import brcyptjs from "bcryptjs";
 import { validationResult } from "express-validator";
 
@@ -19,10 +21,21 @@ export const getUsers = async (req, res, next) => {
 
         const totalUsers = await User.countDocuments();
 
+        const now = new Date();
+
+        const oneMonthAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            now.getDate()
+        );
+        const lastMonthUsers = await User.countDocuments({
+            createdAt: { $gte: oneMonthAgo },
+        });
+
         res.status(200).json({
             status: "success",
             message: "Users fetched successfully",
-            data: { users, totalUsers },
+            data: { users, totalUsers, lastMonthUsers },
         });
     } catch (err) {
         next(err);
@@ -112,6 +125,12 @@ export const deleteUser = async (req, res, next) => {
         }
 
         await User.findByIdAndDelete(req.params.userId);
+        await Post.deleteMany({ userId: req.params.userId });
+        await Comment.deleteMany({ userId: req.params.userId });
+        await Comment.updateMany(
+            { likes: req.params.userId },
+            { $pull: { likes: req.params.userId } }
+        );
 
         res.status(200).json({
             status: "success",

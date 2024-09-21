@@ -26,7 +26,6 @@ export const getPosts = async ({
     limit,
     order,
     slug,
-    postId,
     searchTerm,
 } = {}) => {
     try {
@@ -38,7 +37,6 @@ export const getPosts = async ({
             limit,
             order,
             slug,
-            postId,
             searchTerm,
         };
 
