@@ -105,6 +105,7 @@ const Header = () => {
                                 alt="user"
                                 img={currentUser.profilePic}
                                 rounded
+                                className="object-cover"
                             />
                         }
                     >
