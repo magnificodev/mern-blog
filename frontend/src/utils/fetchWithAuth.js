@@ -5,7 +5,7 @@ export const fetchWithAuth = async (url, options = {}) => {
     try {
         options.method = options.method || "GET";
         const response = await fetch(url, options);
-
+        
         if (response.status === 401) {
             const refreshResponse = await fetch("/api/v1/auth/refresh", {
                 method: "POST",

@@ -1,8 +1,6 @@
-import { fetchWithAuth } from "../utils/fetchWithAuth";
-
 export const signUp = async (userData) => {
     try {
-        const response = await fetchWithAuth("/api/v1/auth/signup", {
+        const response = await fetch("/api/v1/auth/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -24,7 +22,7 @@ export const signUp = async (userData) => {
 
 export const signIn = async (userData) => {
     try {
-        const response = await fetchWithAuth("/api/v1/auth/signin", {
+        const response = await fetch("/api/v1/auth/signin", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +44,7 @@ export const signIn = async (userData) => {
 
 export const googleAuth = async (userData) => {
     try {
-        const response = await fetchWithAuth("/api/v1/auth/google", {
+        const response = await fetch("/api/v1/auth/google", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -68,7 +66,7 @@ export const googleAuth = async (userData) => {
 
 export const signOut = async () => {
     try {
-        const response = await fetchWithAuth("/api/v1/auth/signout", {
+        const response = await fetch("/api/v1/auth/signout", {
             method: "POST",
         });
 
