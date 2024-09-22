@@ -25,6 +25,7 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 // App routes
 app.use("/api/v1/auth", AuthRoutes);
@@ -32,10 +33,7 @@ app.use("/api/v1/users", UserRoutes);
 app.use("/api/v1/posts", PostRoutes);
 app.use("/api/v1/comments", CommentRoutes);
 app.use("*", (req, res) => {
-    res.status(404).json({
-        status: "failure",
-        message: "Route not found",
-    });
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 // Error handling middlewares
