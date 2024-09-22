@@ -157,7 +157,6 @@ const DashProfile = () => {
         }
     }, [imageFile]);
 
-
     if (mutationSignOut.isPending) {
         return (
             <div className="flex flex-col justify-center items-center w-full gap-4">
@@ -259,15 +258,15 @@ const DashProfile = () => {
                     )}
                 </Button>
                 {currentUser.isAdmin && (
-                    <Button
-                        type="button"
-                        gradientDuoTone="purpleToPink"
-                        as={Link}
-                        to="/create-post"
-                        className="focus:z-10 focus:outline-none focus:ring-4 focus:ring-purple-200 hover:bg-gradient-to-l dark:focus:ring-purple-800"
-                    >
-                        Create a post
-                    </Button>
+                    <Link to="/create-post" className="w-full">
+                        <Button
+                            type="button"
+                            gradientDuoTone="purpleToPink"
+                            className="w-full focus:z-10 focus:outline-none focus:ring-4 focus:ring-purple-200 hover:bg-gradient-to-l dark:focus:ring-purple-800"
+                        >
+                            Create a post
+                        </Button>
+                    </Link>
                 )}
             </form>
             <div className="flex justify-between text-red-500 mt-5">

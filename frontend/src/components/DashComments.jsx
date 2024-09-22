@@ -150,7 +150,7 @@ const DashComments = () => {
                     )}
                 </>
             ) : (
-                <p>No users found</p>
+                <p>No comments found</p>
             )}
             <Modal
                 show={showModal}

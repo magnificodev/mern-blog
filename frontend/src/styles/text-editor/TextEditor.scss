@@ -77,6 +77,11 @@
         font-weight: 500;
     }
 
+    p {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
     a {
         text-decoration: underline;
         color: #4995c7;
@@ -84,7 +89,7 @@
 
         &:active,
         &:visited {
-            color: darkblue;
+            color: #076baf;
         }
     }
 

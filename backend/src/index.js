@@ -31,13 +31,19 @@ app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/users", UserRoutes);
 app.use("/api/v1/posts", PostRoutes);
 app.use("/api/v1/comments", CommentRoutes);
+app.use("*", (req, res) => {
+    res.status(404).json({
+        status: "failure",
+        message: "Route not found",
+    });
+});
 
 // Error handling middlewares
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const status = err.status || "failure";
     const message = err.message || "Internal Server Error";
-    
+
     res.status(statusCode).json({
         status,
         message,

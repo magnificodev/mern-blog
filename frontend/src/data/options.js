@@ -8,6 +8,10 @@ export const categories = [
         value: "python",
     },
     {
+        name: "NextJS",
+        value: "nextjs",
+    },
+    {
         name: "Java",
         value: "java",
     },
@@ -198,5 +202,37 @@ export const categories = [
     {
         name: "Game Development",
         value: "gamedevelopment",
+    },
+    {
+        name: "UI/UX Design",
+        value: "uiuxdesign",
+    },
+    {
+        name: "Big Data",
+        value: "bigdata",
+    },
+    {
+        name: "IoT",
+        value: "iot",
+    },
+    {
+        name: "Microservices",
+        value: "microservices",
+    },
+    {
+        name: "Serverless",
+        value: "serverless",
+    },
+    {
+        name: "Progressive Web Apps",
+        value: "pwa",
+    },
+    {
+        name: "Augmented Reality",
+        value: "ar",
+    },
+    {
+        name: "Virtual Reality",
+        value: "vr",
     }
 ]

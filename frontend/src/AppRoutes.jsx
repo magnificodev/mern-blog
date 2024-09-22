@@ -13,7 +13,7 @@ import CreatePost from "./pages/CreatePost";
 import UpdatePost from "./pages/UpdatePost";
 import PrivateRoute from "./components/PrivateRoute";
 import OnlyAdminPrivateRoute from "./components/OnlyAdminPrivateRoute";
-
+import NotFound from "./pages/NotFound";
 const AppRoutes = () => {
     return (
         <Routes>
@@ -37,6 +37,7 @@ const AppRoutes = () => {
                     />
                 </Route>
                 <Route path="/post/:postSlug" element={<PostPage />} />
+                <Route path="*" element={<NotFound />} />
             </Route>
         </Routes>
     );

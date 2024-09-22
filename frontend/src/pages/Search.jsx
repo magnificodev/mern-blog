@@ -5,10 +5,10 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
 import { categories } from "../data/options";
+
 const Search = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const [searchParams, setSearchParams] = useState({
         searchTerm: "",
         order: "desc",
@@ -27,7 +27,6 @@ const Search = () => {
         queryFn: ({ pageParam = 1 }) =>
             getPosts({ ...appliedParams, skip: (pageParam - 1) * 5, limit: 5 }),
         select: (data) => data.pages.flatMap((page) => page.data.posts),
-        enabled: Object.keys(appliedParams).length > 0,
         getNextPageParam: (lastPage, pages) => {
             if (
                 lastPage.data.posts.length < 5 ||
@@ -49,6 +48,8 @@ const Search = () => {
         setSearchParams({ searchTerm, order, category });
         setAppliedParams({ searchTerm, order, category });
     }, [location.search]);
+
+    console.log(searchParams);
 
     const handleSubmit = (e) => {
         e.preventDefault();

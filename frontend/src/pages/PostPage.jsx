@@ -51,7 +51,7 @@ function PostPage() {
                                 className="mx-auto mt-5"
                             >
                                 <Button color="gray" size="xs" pill>
-                                    {postData.category}
+                                    {postData.category.charAt(0).toUpperCase() + postData.category.slice(1)}
                                 </Button>
                             </Link>
                         )}

@@ -22,19 +22,19 @@ const DashDashboard = () => {
     const { data: userData, isLoading: isUsersLoading } = useQuery({
         queryKey: ["users"],
         queryFn: getUsers,
-        select: (data) => data.data,
+        select: (data) => data.data.users,
     });
 
     const { data: commentData, isLoading: isCommentsLoading } = useQuery({
         queryKey: ["comments"],
         queryFn: getComments,
-        select: (data) => data.data,
+        select: (data) => data.data.comments,
     });
 
     const { data: postData, isLoading: isPostsLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: getPosts,
-        select: (data) => data.data,
+        select: (data) => data.data.posts,
     });
 
     const { mutate: getPostMutate } = useMutation({
@@ -116,25 +116,23 @@ const DashDashboard = () => {
             {/* Another */}
 
             <div className="flex flex-wrap gap-4 py-3 mx-auto justify-center">
-                <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
-                    <div className="flex justify-between items-center p-3 text-sm font-semibold">
-                        <h1 className="text-center p-2">Recent users</h1>
-                        {userData?.users.length > 0 && (
+                {userData?.length > 0 && (
+                    <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
+                        <div className="flex justify-between items-center p-3 text-sm font-semibold">
+                            <h1 className="text-center p-2">Recent users</h1>
                             <a
                                 href="/dashboard?tab=users"
                                 className="text-green-500 hover:underline"
                             >
                                 See all
                             </a>
-                        )}
-                    </div>
-                    {userData?.users.length > 0 ? (
+                        </div>
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell>User image</Table.HeadCell>
                                 <Table.HeadCell>Username</Table.HeadCell>
                             </Table.Head>
-                            {userData.users.map((user) => (
+                            {userData.map((user) => (
                                 <Table.Body key={user._id} className="divide-y">
                                     <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
                                         <Table.Cell>
@@ -155,30 +153,25 @@ const DashDashboard = () => {
                                 </Table.Body>
                             ))}
                         </Table>
-                    ) : (
-                        <p className="text-center mb-3">No users found</p>
-                    )}
-                </div>
-                <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
-                    <div className="flex justify-between items-center p-3 text-sm font-semibold">
-                        <h1 className="text-center p-2">Recent comments</h1>
-                        {commentData?.comments.length > 0 && (
+                    </div>
+                )}
+                {commentData?.length > 0 && (
+                    <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
+                        <div className="flex justify-between items-center p-3 text-sm font-semibold">
+                            <h1 className="text-center p-2">Recent comments</h1>
                             <a
                                 href="/dashboard?tab=comments"
                                 className="text-green-500 hover:underline"
                             >
                                 See all
                             </a>
-                        )}
-                    </div>
-                    {commentData?.comments.length > 0 ? (
-
+                        </div>
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell>Comment content</Table.HeadCell>
                                 <Table.HeadCell>Likes</Table.HeadCell>
                             </Table.Head>
-                            {commentData.comments.map((comment) => (
+                            {commentData.map((comment) => (
                                 <Table.Body
                                     key={comment._id}
                                     className="divide-y"
@@ -206,30 +199,26 @@ const DashDashboard = () => {
                                 </Table.Body>
                             ))}
                         </Table>
-                    ) : (
-                        <p className="text-center mb-3">No comments found</p>
-                    )}
-                </div>
-                <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
-                    <div className="flex justify-between items-center p-3 text-sm font-semibold">
-                        <h1 className="text-center p-2">Recent posts</h1>
-                        {postData?.posts.length > 0 && (
+                    </div>
+                )}
+                {postData?.length > 0 && (
+                    <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
+                        <div className="flex justify-between items-center p-3 text-sm font-semibold">
+                            <h1 className="text-center p-2">Recent posts</h1>
                             <a
                                 href="/dashboard?tab=posts"
                                 className="text-green-500 hover:underline"
                             >
-                            See all
-                        </a>
-                    )}
-                    </div>
-                    {postData?.posts.length > 0 ? (
+                                See all
+                            </a>
+                        </div>
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell>Post image</Table.HeadCell>
                                 <Table.HeadCell>Post Title</Table.HeadCell>
                                 <Table.HeadCell>Category</Table.HeadCell>
                             </Table.Head>
-                            {postData.posts.map((post) => (
+                            {postData.map((post) => (
                                 <Table.Body key={post._id} className="divide-y">
                                     <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
                                         <Table.Cell>
@@ -260,10 +249,8 @@ const DashDashboard = () => {
                                 </Table.Body>
                             ))}
                         </Table>
-                    ) : (
-                        <p className="text-center mb-3">No posts found</p>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );
