@@ -1,3 +1,5 @@
+import { fetchWithAuth } from "../utils/fetchWithAuth";
+
 export const getUsers = async ({ skip, limit, order } = {}) => {
     try {
         const url = new URL("/api/v1/users", window.location.origin);
@@ -10,7 +12,7 @@ export const getUsers = async ({ skip, limit, order } = {}) => {
             }
         });
 
-        const response = await fetch(url);
+        const response = await fetchWithAuth(url);
 
         const responseBody = await response.json();
 
@@ -26,7 +28,7 @@ export const getUsers = async ({ skip, limit, order } = {}) => {
 
 export const getUser = async (userId) => {
     try {
-        const response = await fetch(`/api/v1/users/${userId}`);
+        const response = await fetchWithAuth(`/api/v1/users/${userId}`);
         const responseBody = await response.json();
 
         if (responseBody.status === "failure") {
@@ -41,7 +43,7 @@ export const getUser = async (userId) => {
 
 export const updateUser = async ({ userId, userData }) => {
     try {
-        const response = await fetch(`/api/v1/users/${userId}`, {
+        const response = await fetchWithAuth(`/api/v1/users/${userId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -63,7 +65,7 @@ export const updateUser = async ({ userId, userData }) => {
 
 export const deleteUser = async (userId) => {
     try {
-        const response = await fetch(`/api/v1/users/${userId}`, {
+        const response = await fetchWithAuth(`/api/v1/users/${userId}`, {
             method: "DELETE",
         });
 

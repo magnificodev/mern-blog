@@ -5,6 +5,7 @@ import slugify from "slugify";
 
 export const getPosts = async (req, res, next) => {
     try {
+        console.log(req.query)
         const skip = parseInt(req.query.skip) || 0;
         const limit = parseInt(req.query.limit) || 5;
         const order = req.query.order === "asc" ? 1 : -1;

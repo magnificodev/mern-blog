@@ -1,3 +1,5 @@
+import { fetchWithAuth } from "../utils/fetchWithAuth";
+
 export const getPostComments = async ({ postId, skip, limit, order }) => {
     try {
         const url = new URL(
@@ -17,7 +19,7 @@ export const getPostComments = async ({ postId, skip, limit, order }) => {
             }
         });
 
-        const response = await fetch(url);
+        const response = await fetchWithAuth(url);
         const responseBody = await response.json();
 
         if (responseBody.status === "failure") {
@@ -46,7 +48,7 @@ export const getComments = async ({ skip, limit, order }) => {
             }
         });
 
-        const response = await fetch(url);
+        const response = await fetchWithAuth(url);
         const responseBody = await response.json();
 
         if (responseBody.status === "failure") {
@@ -61,7 +63,7 @@ export const getComments = async ({ skip, limit, order }) => {
 
 export const createComment = async (commentData) => {
     try {
-        const response = await fetch("/api/v1/comments", {
+        const response = await fetchWithAuth("/api/v1/comments", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -83,7 +85,7 @@ export const createComment = async (commentData) => {
 
 export const likeComment = async ({ commentId, userId }) => {
     try {
-        const response = await fetch(`/api/v1/comments/${commentId}/likes`, {
+        const response = await fetchWithAuth(`/api/v1/comments/${commentId}/likes`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -105,7 +107,7 @@ export const likeComment = async ({ commentId, userId }) => {
 
 export const editComment = async ({ commentId, content }) => {
     try {
-        const response = await fetch(`/api/v1/comments/${commentId}`, {
+        const response = await fetchWithAuth(`/api/v1/comments/${commentId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -127,7 +129,7 @@ export const editComment = async ({ commentId, content }) => {
 
 export const deleteComment = async (commentId) => {
     try {
-        const response = await fetch(`/api/v1/comments/${commentId}`, {
+        const response = await fetchWithAuth(`/api/v1/comments/${commentId}`, {
             method: "DELETE",
         });
 

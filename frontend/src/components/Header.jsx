@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Navbar, TextInput, Button, Dropdown, Avatar } from "flowbite-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -9,18 +10,16 @@ import { toggleTheme } from "../redux/theme/themeSlice";
 import { signOut } from "../api/auth";
 import { signOutSuccess } from "../redux/user/userSlice";
 import { useAppContext } from "../contexts/AppContext";
+
 const Header = () => {
-    const path = useLocation().pathname;
+    const location = useLocation();
     const { showToast } = useAppContext();
-
+    const [searchTerm, setSearchTerm] = useState("");
     const { currentUser } = useSelector((state) => state.user);
-    const isSignedIn = currentUser !== null;
-
     const { theme } = useSelector((state) => state.theme);
-
     const dispatch = useDispatch();
-
     const navigate = useNavigate();
+    const isSignedIn = currentUser !== null;
 
     const mutationSignOut = useMutation({
         mutationFn: signOut,
@@ -38,6 +37,23 @@ const Header = () => {
         mutationSignOut.mutate();
     };
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const urlParams = new URLSearchParams(location.search);
+        urlParams.set("searchTerm", searchTerm);
+        const searchQuery = urlParams.toString();
+        navigate(`/search?${searchQuery}`);
+    };
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const searchTermFromUrl = urlParams.get("searchTerm");
+
+        if (searchTermFromUrl) {
+            setSearchTerm(searchTermFromUrl);
+        }
+    }, [location.search]);
+
     return (
         <Navbar className="border-b-2 sticky top-0 z-10">
             <Link
@@ -49,16 +65,22 @@ const Header = () => {
                 </span>
                 Blog
             </Link>
-            <form action="">
+            <form onSubmit={handleSubmit}>
                 <TextInput
                     type="text"
                     placeholder="Search..."
                     rightIcon={AiOutlineSearch}
                     className="hidden lg:inline"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </form>
 
-            <Button className="w-12 h-10 items-center lg:hidden" color="gray" pill>
+            <Button
+                className="w-12 h-10 items-center lg:hidden"
+                color="gray"
+                pill
+            >
                 <AiOutlineSearch />
             </Button>
 
@@ -76,10 +98,18 @@ const Header = () => {
                     <Dropdown
                         arrowIcon={false}
                         inline
-                        label={<Avatar alt="user" img={currentUser.profilePic} rounded />}
+                        label={
+                            <Avatar
+                                alt="user"
+                                img={currentUser.profilePic}
+                                rounded
+                            />
+                        }
                     >
                         <Dropdown.Header>
-                            <span className="block text-sm">@{currentUser.username}</span>
+                            <span className="block text-sm">
+                                @{currentUser.username}
+                            </span>
                             <span className="block text-sm font-medium truncate">
                                 {currentUser.email}
                             </span>
@@ -88,7 +118,9 @@ const Header = () => {
                             <Dropdown.Item>Profile</Dropdown.Item>
                         </Link>
                         <Dropdown.Divider />
-                        <Dropdown.Item onClick={handleSignOut}>Sign Out</Dropdown.Item>
+                        <Dropdown.Item onClick={handleSignOut}>
+                            Sign Out
+                        </Dropdown.Item>
                     </Dropdown>
                 ) : (
                     <Link to="/sign-in">
@@ -100,17 +132,20 @@ const Header = () => {
                 <Navbar.Toggle />
             </div>
             <Navbar.Collapse>
-                <Navbar.Link active={path === "/"} as="div">
+                <Navbar.Link active={location.pathname === "/"} as="div">
                     <Link className="block" to="/">
                         Home
                     </Link>
                 </Navbar.Link>
-                <Navbar.Link active={path === "/about"} as="div">
+                <Navbar.Link active={location.pathname === "/about"} as="div">
                     <Link className="block" to="/about">
                         About
                     </Link>
                 </Navbar.Link>
-                <Navbar.Link active={path === "/projects"} as="div">
+                <Navbar.Link
+                    active={location.pathname === "/projects"}
+                    as="div"
+                >
                     <Link className="block" to="/projects">
                         Projects
                     </Link>

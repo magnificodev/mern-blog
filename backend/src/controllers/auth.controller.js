@@ -16,8 +16,8 @@ export const signUp = async (req, res, next) => {
         const { username, email, password } = req.body;
 
         const hashedPassword = await bcryptjs.hash(password, 10);
-        
-        const newUser = await User.create({
+
+        await User.create({
             username,
             email,
             password: hashedPassword,
@@ -47,6 +47,10 @@ export const signIn = async (req, res, next) => {
             email,
         });
 
+        if (!user) {
+            return next(new MyError(401, "User not found"));
+        }
+
         const isPasswordMatched = await bcryptjs.compare(
             password,
             user.password
@@ -58,17 +62,28 @@ export const signIn = async (req, res, next) => {
             );
         } // 401 Unauthorized
 
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             { userId: user._id, isAdmin: user.isAdmin },
-            process.env.JWT_SECRET_KEY
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: "15m" }
+        );
+
+        const refreshToken = jwt.sign(
+            { userId: user._id, isAdmin: user.isAdmin },
+            process.env.JWT_REFRESH_SECRET_KEY,
+            { expiresIn: "7d" }
         );
 
         const { password: pass, ...rest } = user._doc;
 
         res.status(200)
-            .cookie("accessToken", token, {
+            .cookie("accessToken", accessToken, {
                 httpOnly: true,
-                maxAge: 1 * 60 * 60 * 1000, // 1 hour
+                maxAge: 15 * 60 * 1000,
+            })
+            .cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             })
             .json({
                 status: "success",
@@ -91,16 +106,27 @@ export const googleAuth = async (req, res, next) => {
         });
 
         if (existingUser) {
-            const token = jwt.sign(
+            const accessToken = jwt.sign(
                 { userId: existingUser._id, isAdmin: existingUser.isAdmin },
-                process.env.JWT_SECRET_KEY
+                process.env.JWT_SECRET_KEY,
+                { expiresIn: "15m" }
+            );
+
+            const refreshToken = jwt.sign(
+                { userId: existingUser._id, isAdmin: existingUser.isAdmin },
+                process.env.JWT_REFRESH_SECRET_KEY,
+                { expiresIn: "7d" }
             );
 
             const { password: pass, ...rest } = existingUser._doc;
             res.status(200)
-                .cookie("accessToken", token, {
+                .cookie("accessToken", accessToken, {
                     httpOnly: true,
-                    maxAge: 1 * 60 * 60 * 1000,
+                    maxAge: 15 * 60 * 1000,
+                })
+                .cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    maxAge: 7 * 24 * 60 * 60 * 1000,
                 })
                 .json({
                     status: "success",
@@ -125,16 +151,27 @@ export const googleAuth = async (req, res, next) => {
                 profilePic: googlePhotoUrl,
             });
 
-            const token = jwt.sign(
+            const accessToken = jwt.sign(
                 { userId: newUser._id, isAdmin: newUser.isAdmin },
-                process.env.JWT_SECRET_KEY
+                process.env.JWT_SECRET_KEY,
+                { expiresIn: "15m" }
+            );
+
+            const refreshToken = jwt.sign(
+                { userId: newUser._id, isAdmin: newUser.isAdmin },
+                process.env.JWT_REFRESH_SECRET_KEY,
+                { expiresIn: "7d" }
             );
 
             const { password: pass, ...rest } = newUser._doc;
             res.status(200)
-                .cookie("accessToken", token, {
+                .cookie("accessToken", accessToken, {
                     httpOnly: true,
-                    maxAge: 1 * 60 * 60 * 1000,
+                    maxAge: 15 * 60 * 1000,
+                })
+                .cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    maxAge: 7 * 24 * 60 * 60 * 1000,
                 })
                 .json({
                     status: "success",
@@ -151,11 +188,90 @@ export const googleAuth = async (req, res, next) => {
 
 export const signOut = async (req, res, next) => {
     try {
-        res.clearCookie("accessToken").status(200).json({
-            status: "success",
-            message: "User has been signed out",
-            data: {},
-        });
+        res.clearCookie("accessToken")
+            .clearCookie("refreshToken")
+            .status(200)
+            .json({
+                status: "success",
+                message: "User has been signed out",
+                data: {},
+            });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const refreshToken = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies["refreshToken"];
+        if (!refreshToken) {
+            return next(new MyError(401, "Unauthorized"));
+        }
+
+        jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET_KEY,
+            (err, decoded) => {
+                if (err) {
+                    res.clearCookie("accessToken");
+                    res.clearCookie("refreshToken");
+
+                    if (err.name === "TokenExpiredError") {
+                        console.log("Refresh token expired");
+                        return next(
+                            new MyError(
+                                401,
+                                "Session expired, please sign in again."
+                            )
+                        );
+                    }
+                    return next(new MyError(401, "Invalid refresh token"));
+                }
+
+                const accessToken = jwt.sign(
+                    { userId: decoded.userId, isAdmin: decoded.isAdmin },
+                    process.env.JWT_SECRET_KEY,
+                    { expiresIn: "15m" }
+                );
+
+                res.status(200)
+                    .cookie("accessToken", accessToken, {
+                        httpOnly: true,
+                        maxAge: 15 * 60 * 1000,
+                    })
+                    .json({
+                        status: "success",
+                        message: "Refresh token successfully",
+                    });
+            }
+        );
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const checkAuth = async (req, res, next) => {
+    try {
+        const token = req.cookies["refreshToken"];
+        if (!token) {
+            return res.status(401).json({ isAuth: false });
+        }
+
+        jwt.verify(
+            token,
+            process.env.JWT_REFRESH_SECRET_KEY,
+            (err, decoded) => {
+                if (err) {
+                    if (err.name === "TokenExpiredError") {
+                        return res.status(401).json({ isAuth: false });
+                    }
+                    return res.status(401).json({ isAuth: false });
+                }
+                res.status(200).json({
+                    isAuth: true,
+                });
+            }
+        );
     } catch (err) {
         next(err);
     }

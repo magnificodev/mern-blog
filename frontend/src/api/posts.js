@@ -1,6 +1,8 @@
+import { fetchWithAuth } from "../utils/fetchWithAuth";
+
 export const createPost = async (postData) => {
     try {
-        const response = await fetch("/api/v1/posts", {
+        const response = await fetchWithAuth("/api/v1/posts", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -25,10 +27,14 @@ export const getPosts = async ({
     skip,
     limit,
     order,
+    category,
     slug,
     searchTerm,
 } = {}) => {
     try {
+        console.log("searchTerm", searchTerm);
+        console.log("category", category);
+        console.log("order", order);
         const url = new URL("/api/v1/posts", window.location.origin);
 
         const params = {
@@ -36,6 +42,7 @@ export const getPosts = async ({
             skip,
             limit,
             order,
+            category,
             slug,
             searchTerm,
         };
@@ -46,7 +53,7 @@ export const getPosts = async ({
             }
         });
 
-        const response = await fetch(url);
+        const response = await fetchWithAuth(url);
 
         const responseBody = await response.json();
         if (responseBody.status === "failure") {
@@ -61,7 +68,7 @@ export const getPosts = async ({
 
 export const getPost = async (postId) => {
     try {
-        const response = await fetch(`/api/v1/posts/${postId}`);
+        const response = await fetchWithAuth(`/api/v1/posts/${postId}`);
 
         const responseBody = await response.json();
 
@@ -77,7 +84,7 @@ export const getPost = async (postId) => {
 
 export const updatePost = async ({ postId, postData }) => {
     try {
-        const response = await fetch(`/api/v1/posts/${postId}`, {
+        const response = await fetchWithAuth(`/api/v1/posts/${postId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -98,9 +105,8 @@ export const updatePost = async ({ postId, postData }) => {
 };
 
 export const deletePost = async (postId) => {
-    console.log("postId", postId);
     try {
-        const response = await fetch(`/api/v1/posts/${postId}`, {
+        const response = await fetchWithAuth(`/api/v1/posts/${postId}`, {
             method: "DELETE",
         });
 
