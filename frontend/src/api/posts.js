@@ -32,9 +32,6 @@ export const getPosts = async ({
     searchTerm,
 } = {}) => {
     try {
-        console.log("searchTerm", searchTerm);
-        console.log("category", category);
-        console.log("order", order);
         const url = new URL("/api/v1/posts", window.location.origin);
 
         const params = {

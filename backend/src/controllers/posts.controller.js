@@ -5,7 +5,6 @@ import slugify from "slugify";
 
 export const getPosts = async (req, res, next) => {
     try {
-        console.log(req.query)
         const skip = parseInt(req.query.skip) || 0;
         const limit = parseInt(req.query.limit) || 5;
         const order = req.query.order === "asc" ? 1 : -1;
@@ -29,10 +28,6 @@ export const getPosts = async (req, res, next) => {
             .skip(skip)
             .limit(limit)
             .sort({ updatedAt: order });
-
-        if (posts.length === 0) {
-            return next(new MyError(404, "Posts not found"));
-        }
 
         const totalPosts = await Post.countDocuments();
 
@@ -65,10 +60,6 @@ export const getPosts = async (req, res, next) => {
 export const getPost = async (req, res, next) => {
     try {
         const post = await Post.findById(req.params.postId);
-
-        if (!post) {
-            return next(new MyError(404, "Post not found"));
-        }
 
         res.status(200).json({
             status: "success",
@@ -130,10 +121,6 @@ export const updatePost = async (req, res, next) => {
 
         const post = await Post.findById(req.params.postId);
 
-        if (!post) {
-            return next(new MyError(404, "Post not found"));
-        }
-
         if (req.userId !== post.userId && !req.isAdmin) {
             return next(
                 new MyError(403, "You are not allowed to update this post")
@@ -168,10 +155,6 @@ export const updatePost = async (req, res, next) => {
 export const deletePost = async (req, res, next) => {
     try {
         const post = await Post.findById(req.params.postId);
-
-        if (!post) {
-            return next(new MyError(404, "Post not found"));
-        }
 
         if (req.userId !== post.userId && !req.isAdmin) {
             return next(

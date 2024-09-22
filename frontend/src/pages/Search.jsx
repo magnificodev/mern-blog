@@ -1,47 +1,63 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TextInput, Button, Select, Spinner } from "flowbite-react";
-import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
 
 const Search = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { register, handleSubmit, getValues, setValue } = useForm();
-
-    useEffect(() => {
-        console.log(location.search)
-        const urlParams = new URLSearchParams(location.search);
-        setValue("searchTerm", urlParams.get("searchTerm") || "");
-        setValue("order", urlParams.get("order") || "desc");
-        setValue("category", urlParams.get("category") || "uncategorized");
-    }, [location.search]);
+    const [searchParams, setSearchParams] = useState({
+        searchTerm: "",
+        order: "desc",
+        category: "uncategorized",
+    });
+    const [appliedParams, setAppliedParams] = useState({});
 
     const {
         data: posts,
         isLoading,
-    } = useQuery({
-        queryKey: ["posts", location.search],
-        queryFn: () =>
-            getPosts({
-                searchTerm: getValues("searchTerm"),
-                order: getValues("order"),
-                category: getValues("category"),
-            }),
-        select: (data) => data.data.posts,
-        staleTime: 0,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ["posts", appliedParams],
+        queryFn: ({ pageParam = 1 }) =>
+            getPosts({ ...appliedParams, skip: (pageParam - 1) * 5, limit: 5 }),
+        select: (data) => data.pages.flatMap((page) => page.data.posts),
+        enabled: Object.keys(appliedParams).length > 0,
+        getNextPageParam: (lastPage, pages) => {
+            if (
+                lastPage.data.posts.length < 5 ||
+                (lastPage.data.posts.length === 5 &&
+                    pages.length * 5 === lastPage.data.totalPosts)
+            ) {
+                return undefined;
+            }
+            return pages.length + 1;
+        },
     });
 
-    const onSubmit = (formData) => {
+    useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
-        Object.keys(formData).forEach((key) => {
-            if (!!formData[key]) {
-                console.log(key, formData[key]);
-                urlParams.set(key, formData[key]);
+        const searchTerm = urlParams.get("searchTerm") || "";
+        const order = urlParams.get("order") || "desc";
+        const category = urlParams.get("category") || "uncategorized";
+
+        setSearchParams({ searchTerm, order, category });
+        setAppliedParams({ searchTerm, order, category });
+    }, [location.search]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const urlParams = new URLSearchParams();
+        Object.keys(searchParams).forEach((key) => {
+            if (searchParams[key]) {
+                urlParams.set(key, searchParams[key]);
             }
         });
+        setAppliedParams(searchParams);
         navigate(`/search?${urlParams.toString()}`);
     };
 
@@ -49,7 +65,7 @@ const Search = () => {
         <div className="flex flex-col md:flex-row">
             <div className="p-7 border-b md:border-r md:min-h-screen border-gray-500">
                 <form
-                    onSubmit={handleSubmit(onSubmit)}
+                    onSubmit={(e) => handleSubmit(e)}
                     className="flex flex-col gap-8"
                 >
                     <div className="flex items-center gap-2">
@@ -57,19 +73,41 @@ const Search = () => {
                         <TextInput
                             type="text"
                             placeholder="Search..."
-                            {...register("searchTerm")}
+                            value={searchParams.searchTerm}
+                            onChange={(e) =>
+                                setSearchParams({
+                                    ...searchParams,
+                                    searchTerm: e.target.value,
+                                })
+                            }
                         />
                     </div>
                     <div className="flex items-center gap-2">
                         <label className="font-semibold">Sort:</label>
-                        <Select {...register("order")}>
+                        <Select
+                            value={searchParams.order}
+                            onChange={(e) =>
+                                setSearchParams({
+                                    ...searchParams,
+                                    order: e.target.value,
+                                })
+                            }
+                        >
                             <option value="desc">Latest</option>
                             <option value="asc">Oldest</option>
                         </Select>
                     </div>
                     <div className="flex items-center gap-2">
                         <label className="font-semibold">Category:</label>
-                        <Select {...register("category")}>
+                        <Select
+                            value={searchParams.category}
+                            onChange={(e) =>
+                                setSearchParams({
+                                    ...searchParams,
+                                    category: e.target.value,
+                                })
+                            }
+                        >
                             <option value="uncategorized">Uncategorized</option>
                             <option value="javascript">Javascript</option>
                             <option value="reactjs">ReactJS</option>
@@ -103,6 +141,17 @@ const Search = () => {
                                 ))
                             ) : (
                                 <p>No posts found.</p>
+                            )}
+                            {hasNextPage && (
+                                <button
+                                    onClick={() => fetchNextPage()}
+                                    disabled={isFetchingNextPage}
+                                    className="w-full text-teal-500 self-center text-sm py-4 hover:underline"
+                                >
+                                    {isFetchingNextPage
+                                        ? "Loading more..."
+                                        : "Show more"}
+                                </button>
                             )}
                         </div>
                     </>

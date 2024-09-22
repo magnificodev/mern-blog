@@ -21,7 +21,7 @@ const DashComments = () => {
     const navigate = useNavigate();
 
     const {
-        data,
+        data: comments,
         isLoading,
         isError,
         fetchNextPage,
@@ -42,9 +42,8 @@ const DashComments = () => {
             return pages.length + 1;
         },
         refetchInterval: 10000,
+        select: (data) => data.pages.flatMap((page) => page.data.comments),
     });
-
-    const comments = data?.pages.flatMap((page) => page.data.comments) || [];
 
     const { mutate: getPostMutate } = useMutation({
         mutationFn: getPost,

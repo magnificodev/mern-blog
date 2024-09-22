@@ -102,8 +102,6 @@ export const likeComment = async (req, res, next) => {
 
         const comment = await Comment.findById(commentId);
 
-        if (!comment) return next(new MyError(404, "Comment not found!"));
-
         if (comment.likes.includes(userId)) {
             comment.likes = comment.likes.filter((id) => id !== userId);
         } else {
@@ -132,8 +130,6 @@ export const editComment = async (req, res, next) => {
         const { commentId } = req.params;
 
         const comment = await Comment.findById(commentId);
-
-        if (!comment) return next(new MyError(404, "Comment not found!"));
 
         if (comment.userId !== req.userId)
             return next(
@@ -188,8 +184,6 @@ export const deleteComment = async (req, res, next) => {
         const { commentId } = req.params;
 
         const comment = await Comment.findById(commentId);
-
-        if (!comment) return next(new MyError(404, "Comment not found!"));
 
         if (comment.userId !== req.userId && !req.isAdmin)
             return next(

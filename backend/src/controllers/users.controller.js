@@ -46,10 +46,6 @@ export const getUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.params.userId);
 
-        if (!user) {
-            return next(new MyError(404, "User not found"));
-        }
-
         const { password, ...rest } = user._doc;
 
         res.status(200).json({
@@ -90,10 +86,6 @@ export const updateUser = async (req, res, next) => {
             { $set: rest },
             { new: true }
         );
-
-        if (!updatedUser) {
-            return next(new MyError(404, "User not found"));
-        }
 
         const { password: _, ...userWithoutPassword } = updatedUser._doc;
 

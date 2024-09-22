@@ -20,7 +20,7 @@ const DashPosts = () => {
     const queryClient = useQueryClient();
 
     const {
-        data,
+        data: posts,
         isLoading,
         isError,
         fetchNextPage,
@@ -41,11 +41,9 @@ const DashPosts = () => {
             return pages.length + 1;
         },
         refetchInterval: 10000,
+        select: (data) => data.pages.flatMap((page) => page.data.posts),
     });
-    console.log(data);
-
-    const posts = data?.pages.flatMap((page) => page.data.posts) || [];
-
+    
     const { mutate: deletePostMutate, isPending: isDeleting } = useMutation({
         mutationFn: deletePost,
         onSuccess: (data) => {

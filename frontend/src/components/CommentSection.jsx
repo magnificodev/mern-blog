@@ -18,7 +18,7 @@ const CommentSection = ({ postId }) => {
     const queryClient = useQueryClient();
 
     const {
-        data,
+        data: comments,
         isLoading,
         isError,
         fetchNextPage,
@@ -40,6 +40,7 @@ const CommentSection = ({ postId }) => {
             return pages.length + 1;
         },
         refetchInterval: 3000,
+        select: (data) => data.pages.flatMap((page) => page.data.comments),
     });
 
     const {
@@ -70,8 +71,6 @@ const CommentSection = ({ postId }) => {
             </div>
         );
     if (isError) return <p>There is something wrong</p>;
-
-    const comments = data?.pages.flatMap((page) => page.data.comments) || [];
 
     return (
         <div className="max-w-2xl mx-auto w-full">

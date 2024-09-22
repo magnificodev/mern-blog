@@ -19,7 +19,7 @@ const DashUsers = () => {
     const queryClient = useQueryClient();
 
     const {
-        data,
+        data: users,
         isLoading,
         isError,
         fetchNextPage,
@@ -40,9 +40,8 @@ const DashUsers = () => {
             return pages.length + 1;
         },
         refetchInterval: 10000,
+        select: (data) => data.pages.flatMap((page) => page.data.users),
     });
-
-    const users = data?.pages.flatMap((page) => page.data.users) || [];
 
     const { mutate: deleteUserMutate, isPending: isDeleting } = useMutation({
         mutationFn: deleteUser,
