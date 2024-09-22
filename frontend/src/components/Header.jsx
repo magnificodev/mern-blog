@@ -101,11 +101,11 @@ const Header = () => {
                         arrowIcon={false}
                         inline
                         label={
-                            <Avatar
+                            <img
                                 alt="user"
-                                img={currentUser.profilePic}
+                                src={currentUser.profilePic}
                                 rounded
-                                className="object-cover"
+                                className="w-10 h-10 object-cover rounded-full"
                             />
                         }
                     >
