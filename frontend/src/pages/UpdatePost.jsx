@@ -11,7 +11,7 @@ import {
     Spinner,
     TextInput,
 } from "flowbite-react";
-
+import { categories } from "../data/options";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
@@ -33,7 +33,11 @@ const UpdatePost = () => {
     const navigate = useNavigate();
     const { register, setValue, getValues, handleSubmit, watch } = useForm();
 
-    const { data: postData, isLoading, isError } = useQuery({
+    const {
+        data: postData,
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: ["post", postId],
         queryFn: () => getPost(postId),
         select: (data) => data.data.post,
@@ -54,7 +58,7 @@ const UpdatePost = () => {
             navigate(`/post/${data.data.post.slug}`);
             queryClient.invalidateQueries({ queryKey: ["post", postId] });
             showToast({ type: data.status, message: data.message });
-        }
+        },
     });
 
     const onSubmit = (updatedPostData) => {
@@ -133,9 +137,11 @@ const UpdatePost = () => {
                     />
                     <Select id="categories" {...register("category")}>
                         <option value="uncategorized">Select a category</option>
-                        <option value="javascript">Javascript</option>
-                        <option value="reactjs">ReactJS</option>
-                        <option value="nextjs">NextJS</option>
+                        {categories.map((category) => (
+                            <option key={category.value} value={category.value}>
+                                {category.name}
+                            </option>
+                        ))}
                     </Select>
                 </div>
                 <div className="flex flex-col gap-4 border-4 border-dotted border-teal-500 p-4">

@@ -1,5 +1,6 @@
 import { MyError } from "../utils/error.handler.js";
 import Post from "../models/post.model.js";
+import Comment from "../models/comment.model.js";
 import { validationResult } from "express-validator";
 import slugify from "slugify";
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     TextInput,
     Select,
@@ -16,18 +16,21 @@ import { useMutation } from "@tanstack/react-query";
 import { createPost } from "../api/posts";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
+import { categories } from "../data/options";
 
 const CreatePost = () => {
     const [imageFile, setImageFile] = useState(null);
     const [imageUploadProgress, setImageUploadProgress] = useState(null);
     const [imageUploadError, setImageUploadError] = useState(null);
     const { showToast } = useAppContext();
+    const [customCategory, setCustomCategory] = useState("");
 
     const {
         register,
         setValue,
         getValues,
         handleSubmit,
+        watch,
         formState: { isDirty },
     } = useForm({
         defaultValues: {
@@ -44,7 +47,7 @@ const CreatePost = () => {
         onSuccess: (data) => {
             navigate(`/post/${data.data.post.slug}`);
             showToast({ type: data.status, message: data.message });
-        }
+        },
     });
 
     const onSubmit = (postData) => {
@@ -107,9 +110,11 @@ const CreatePost = () => {
                     />
                     <Select id="categories" {...register("category")}>
                         <option value="uncategorized">Select a category</option>
-                        <option value="javascript">Javascript</option>
-                        <option value="reactjs">ReactJS</option>
-                        <option value="nextjs">NextJS</option>
+                        {categories.map((category) => (
+                            <option key={category.value} value={category.value}>
+                                {category.name}
+                            </option>
+                        ))}
                     </Select>
                 </div>
                 <div className="flex flex-col gap-4 border-4 border-dotted border-teal-500 p-4">
@@ -163,10 +168,7 @@ const CreatePost = () => {
                         className="w-full h-72 object-cover"
                     />
                 )}
-                <TextEditor
-                    register={register}
-                    setValue={setValue}
-                />
+                <TextEditor register={register} setValue={setValue} />
                 <Button
                     type="submit"
                     gradientDuoTone="purpleToPink"

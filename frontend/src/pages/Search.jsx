@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { TextInput, Button, Select, Spinner } from "flowbite-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
-
+import { categories } from "../data/options";
 const Search = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [searchParams, setSearchParams] = useState({
         searchTerm: "",
         order: "desc",
@@ -71,6 +72,7 @@ const Search = () => {
                     <div className="flex items-center gap-2">
                         <label className="font-semibold">Search Term:</label>
                         <TextInput
+                            className="flex-1"
                             type="text"
                             placeholder="Search..."
                             value={searchParams.searchTerm}
@@ -92,6 +94,7 @@ const Search = () => {
                                     order: e.target.value,
                                 })
                             }
+                            className="flex-1"
                         >
                             <option value="desc">Latest</option>
                             <option value="asc">Oldest</option>
@@ -107,11 +110,19 @@ const Search = () => {
                                     category: e.target.value,
                                 })
                             }
+                            className="flex-1"
                         >
-                            <option value="uncategorized">Uncategorized</option>
-                            <option value="javascript">Javascript</option>
-                            <option value="reactjs">ReactJS</option>
-                            <option value="nextjs">NextJS</option>
+                            <option value="uncategorized">
+                                Select a category
+                            </option>
+                            {categories.map((category) => (
+                                <option
+                                    key={category.value}
+                                    value={category.value}
+                                >
+                                    {category.name}
+                                </option>
+                            ))}
                         </Select>
                     </div>
                     <Button
@@ -125,36 +136,32 @@ const Search = () => {
                 </form>
             </div>
             <div className="w-full p-7">
+                <h1 className="text-3xl font-semibold mb-4">Search Results</h1>
                 {isLoading ? (
                     <div className="flex justify-center items-center min-h-screen">
                         <Spinner size="xl" />
                     </div>
                 ) : (
-                    <>
-                        <h1 className="text-3xl font-semibold mb-4">
-                            Search Results
-                        </h1>
-                        <div className="flex flex-wrap gap-4">
-                            {posts && posts.length > 0 ? (
-                                posts.map((post) => (
-                                    <PostCard key={post._id} post={post} />
-                                ))
-                            ) : (
-                                <p>No posts found.</p>
-                            )}
-                            {hasNextPage && (
-                                <button
-                                    onClick={() => fetchNextPage()}
-                                    disabled={isFetchingNextPage}
-                                    className="w-full text-teal-500 self-center text-sm py-4 hover:underline"
-                                >
-                                    {isFetchingNextPage
-                                        ? "Loading more..."
-                                        : "Show more"}
-                                </button>
-                            )}
-                        </div>
-                    </>
+                    <div className="flex flex-wrap gap-4">
+                        {posts && posts.length > 0 ? (
+                            posts.map((post) => (
+                                <PostCard key={post._id} post={post} />
+                            ))
+                        ) : (
+                            <p>No posts found.</p>
+                        )}
+                        {hasNextPage && (
+                            <button
+                                onClick={() => fetchNextPage()}
+                                disabled={isFetchingNextPage}
+                                className="w-full text-teal-500 self-center text-sm py-4 hover:underline"
+                            >
+                                {isFetchingNextPage
+                                    ? "Loading more..."
+                                    : "Show more"}
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

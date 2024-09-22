@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import moment from "moment";
 import { useSelector } from "react-redux";
@@ -7,6 +7,7 @@ import { Button, Spinner } from "flowbite-react";
 import { Modal, Textarea } from "flowbite-react";
 
 import { FaThumbsUp, FaUserShield } from "react-icons/fa";
+import { GiSprout } from "react-icons/gi";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -22,7 +23,7 @@ const Comment = ({ comment }) => {
     const [editedContent, setEditedContent] = useState(comment.content);
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    
+
     const { data: user } = useQuery({
         queryKey: ["user", comment.userId],
         queryFn: () => getUser(comment.userId),
@@ -75,6 +76,11 @@ const Comment = ({ comment }) => {
                         <p className="text-xs font-medium text-red-700 flex items-center gap-1">
                             @{user?.username}
                             <FaUserShield className="w-3 h-3" title="Admin" />
+                        </p>
+                    ) : new Date().getDate() - new Date(user?.createdAt).getDate() < 3 ? (
+                        <p className="text-xs font-medium text-green-500 flex items-center gap-1">
+                            @{user?.username}
+                            <GiSprout className="w-3 h-3" title="New User" />
                         </p>
                     ) : (
                         <p className="text-xs font-medium">@{user?.username}</p>
@@ -143,7 +149,7 @@ const Comment = ({ comment }) => {
                                     likeCommentMutate({
                                         commentId: comment._id,
                                         userId: currentUser?._id,
-                                    })
+                                    });
                                 }}
                             >
                                 <FaThumbsUp className="w-4 h-4" />
@@ -224,6 +230,6 @@ const Comment = ({ comment }) => {
             )}
         </div>
     );
-}
+};
 
 export default Comment;
