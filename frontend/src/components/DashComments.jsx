@@ -29,7 +29,7 @@ const DashComments = () => {
         isFetchingNextPage,
     } = useInfiniteQuery({
         queryKey: ["comments"],
-        queryFn: ({ pageParam }) => getComments({ userId: currentUser._id, skip: (pageParam - 1) * 5 }),
+        queryFn: ({ pageParam }) => getComments({ skip: (pageParam - 1) * 5 }),
         initialPageParam: 1,
         getNextPageParam: (lastPage, pages) => {
             if (
