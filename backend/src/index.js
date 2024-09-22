@@ -20,6 +20,8 @@ mongoose
     .then(() => console.log("MongoDB is connected successfully"))
     .catch((err) => console.log(err));
 
+const __dirname = path.resolve();
+
 const app = express();
 
 // Middlewares
