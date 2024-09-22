@@ -28,7 +28,7 @@ const DashPosts = () => {
         isFetchingNextPage,
     } = useInfiniteQuery({
         queryKey: ["posts"],
-        queryFn: ({ pageParam }) => getPosts({ skip: (pageParam - 1) * 5 }),
+        queryFn: ({ pageParam }) => getPosts({ userId: currentUser._id, skip: (pageParam - 1) * 5 }),
         initialPageParam: 1,
         getNextPageParam: (lastPage, pages) => {
             if (
