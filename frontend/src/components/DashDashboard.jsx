@@ -22,19 +22,19 @@ const DashDashboard = () => {
     const { data: userData, isLoading: isUsersLoading } = useQuery({
         queryKey: ["users"],
         queryFn: getUsers,
-        select: (data) => data.data.users,
+        select: (data) => data.data,
     });
 
     const { data: commentData, isLoading: isCommentsLoading } = useQuery({
         queryKey: ["comments"],
         queryFn: getComments,
-        select: (data) => data.data.comments,
+        select: (data) => data.data,
     });
 
     const { data: postData, isLoading: isPostsLoading } = useQuery({
         queryKey: ["posts"],
         queryFn: getPosts,
-        select: (data) => data.data.posts,
+        select: (data) => data.data,
     });
 
     const { mutate: getPostMutate } = useMutation({
@@ -71,7 +71,7 @@ const DashDashboard = () => {
                             {userData?.lastMonthUsers}
                         </span>
                         <div className="text-gray-500">Last month</div>
-                    </div>
+                    </div>  
                 </div>
                 <div className="flex flex-col p-3 dark:bg-slate-800 gap-4 md:w-72 w-full rounded-md shadow-md">
                     <div className="flex justify-between">
@@ -116,7 +116,7 @@ const DashDashboard = () => {
             {/* Another */}
 
             <div className="flex flex-wrap gap-4 py-3 mx-auto justify-center">
-                {userData?.length > 0 && (
+                {userData?.users?.length > 0 && (
                     <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                         <div className="flex justify-between items-center p-3 text-sm font-semibold">
                             <h1 className="text-center p-2">Recent users</h1>
@@ -132,7 +132,7 @@ const DashDashboard = () => {
                                 <Table.HeadCell>User image</Table.HeadCell>
                                 <Table.HeadCell>Username</Table.HeadCell>
                             </Table.Head>
-                            {userData.map((user) => (
+                            {userData.users.map((user) => (
                                 <Table.Body key={user._id} className="divide-y">
                                     <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
                                         <Table.Cell>
@@ -155,7 +155,7 @@ const DashDashboard = () => {
                         </Table>
                     </div>
                 )}
-                {commentData?.length > 0 && (
+                {commentData?.comments?.length > 0 && (
                     <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                         <div className="flex justify-between items-center p-3 text-sm font-semibold">
                             <h1 className="text-center p-2">Recent comments</h1>
@@ -171,7 +171,7 @@ const DashDashboard = () => {
                                 <Table.HeadCell>Comment content</Table.HeadCell>
                                 <Table.HeadCell>Likes</Table.HeadCell>
                             </Table.Head>
-                            {commentData.map((comment) => (
+                            {commentData.comments.map((comment) => (
                                 <Table.Body
                                     key={comment._id}
                                     className="divide-y"
@@ -201,7 +201,7 @@ const DashDashboard = () => {
                         </Table>
                     </div>
                 )}
-                {postData?.length > 0 && (
+                {postData?.posts?.length > 0 && (
                     <div className="flex flex-col w-full md:w-auto shadow-md p-2 rounded-md dark:bg-gray-800">
                         <div className="flex justify-between items-center p-3 text-sm font-semibold">
                             <h1 className="text-center p-2">Recent posts</h1>
@@ -218,7 +218,7 @@ const DashDashboard = () => {
                                 <Table.HeadCell>Post Title</Table.HeadCell>
                                 <Table.HeadCell>Category</Table.HeadCell>
                             </Table.Head>
-                            {postData.map((post) => (
+                            {postData.posts.map((post) => (
                                 <Table.Body key={post._id} className="divide-y">
                                     <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
                                         <Table.Cell>
